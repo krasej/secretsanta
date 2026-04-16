@@ -1,6 +1,13 @@
 import { initializeApp } from 'firebase/app'
 import {
-  addDoc,
+  createUserWithEmailAndPassword,
+  getAuth,
+  onAuthStateChanged,
+  signInWithEmailAndPassword,
+  signOut,
+  type User as FirebaseAuthUser,
+} from 'firebase/auth'
+import {
   collection,
   doc,
   getDoc,
@@ -9,17 +16,7 @@ import {
   orderBy,
   query,
   setDoc,
-  updateDoc,
-  where,
 } from 'firebase/firestore'
-import {
-  createUserWithEmailAndPassword,
-  getAuth,
-  onAuthStateChanged,
-  signInWithEmailAndPassword,
-  signOut,
-  type User as FirebaseUser,
-} from 'firebase/auth'
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -31,78 +28,77 @@ const firebaseConfig = {
 }
 
 const app = initializeApp(firebaseConfig)
-const db = getFirestore(app)
 const auth = getAuth(app)
+const db = getFirestore(app)
 const usersCollection = collection(db, 'users')
 
-export type User = {
+export type UserProfile = {
   id: string
+  email: string
   name: string
   discordName: string
-  isAdmin?: boolean
-  giftee?: string
-  presents?: stringK
-  address?: string
+  giftee?: string | null
+  presents?: string | null
+  address?: string | null
+  role?: 'admin' | 'user'
 }
 
-export async function signUp(email: string, password: string): Promise<FirebaseUser> {
-  const userCredential = await createUserWithEmailAndPassword(auth, email, password)
-  return userCredential.user
+export type FirebaseUser = FirebaseAuthUser
+
+export async function registerUser(
+  email: string,
+  password: string,
+  profile: Omit<UserProfile, 'id' | 'role' | 'email'>,
+) {
+  const credential = await createUserWithEmailAndPassword(auth, email, password)
+  const uid = credential.user.uid
+
+  await setDoc(doc(db, 'users', uid), {
+    email,
+    name: profile.name,
+    discordName: profile.discordName,
+    giftee: profile.giftee || null,
+    presents: profile.presents || null,
+    address: profile.address || null,
+    role: 'user',
+  })
+
+  return credential.user
 }
 
-export async function signIn(email: string, password: string): Promise<FirebaseUser> {
-  const userCredential = await signInWithEmailAndPassword(auth, email, password)
-  return userCredential.user
+export async function loginUser(email: string, password: string) {
+  const credential = await signInWithEmailAndPassword(auth, email, password)
+  return credential.user
 }
 
-export async function logOut(): Promise<void> {
-  await signOut(auth)
+export function signOutUser() {
+  return signOut(auth)
 }
 
-export function onAuthStateChange(callback: (user: FirebaseUser | null) => void): () => void {
+export function onAuthStateChange(callback: (user: FirebaseAuthUser | null) => void) {
   return onAuthStateChanged(auth, callback)
 }
 
-export async function getCurrentUser(): Promise<FirebaseUser | null> {
-  return new Promise((resolve) => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      unsubscribe()
-      resolve(user)
-    })
-  })
-}
-
-export async function createUserProfile(uid: string, userData: Omit<User, 'id'>): Promise<void> {
-  await setDoc(doc(db, 'users', uid), {
-    name: userData.name,
-    discordName: userData.discordName,
-    isAdmin: userData.isAdmin || false,
-    giftee: userData.giftee || null,
-    presents: userData.presents || null,
-    address: userData.address || null,
-  })
-}
-
-export async function getUserProfile(uid: string): Promise<User | null> {
-  const docSnap = await getDoc(doc(db, 'users', uid))
-  if (docSnap.exists()) {
-    return { id: docSnap.id, ...docSnap.data() } as User
+export async function getUserProfile(uid: string): Promise<UserProfile | null> {
+  const snapshot = await getDoc(doc(db, 'users', uid))
+  if (!snapshot.exists()) {
+    return null
   }
-  return null
+
+  return {
+    id: snapshot.id,
+    ...(snapshot.data() as Omit<UserProfile, 'id'>),
+  }
 }
 
-export async function updateUserProfile(uid: string, updates: Partial<User>): Promise<void> {
-  await updateDoc(doc(db, 'users', uid), updates)
+export async function getAllUsers(): Promise<UserProfile[]> {
+  const snapshot = await getDocs(query(usersCollection, orderBy('name')))
+  return snapshot.docs.map((item) => ({
+    id: item.id,
+    ...(item.data() as Omit<UserProfile, 'id'>),
+  }))
 }
 
-export async function getUsers(): Promise<User[]> {
-  const q = query(usersCollection, orderBy('name'))
-  const snapshot = await getDocs(q)
-  return snapshot.docs.map((doc) => ({ id: doc.id, ...(doc.data() as Omit<User, 'id'>) }))
-}
-
-export async function getUsersByDiscordName(discordName: string): Promise<User[]> {
-  const q = query(usersCollection, where('discordName', '==', discordName))
-  const snapshot = await getDocs(q)
-  return snapshot.docs.map((doc) => ({ id: doc.id, ...(doc.data() as Omit<User, 'id'>) }))
+export function getCurrentUser() {
+  return auth.currentUser
 }
