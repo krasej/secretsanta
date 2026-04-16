@@ -33,7 +33,13 @@ const db = getFirestore(app)
 const usersCollection = collection(db, 'users')
 const privateProfilesCollection = collection(db, 'userPrivate')
 
-export type PresentsJson = unknown
+export type PresentItem = {
+  headline: string
+  link: string
+  url: string
+}
+
+export type PresentsJson = PresentItem[]
 
 export type UserProfile = {
   id: string

@@ -11,6 +11,7 @@ import {
   signOutUser,
   updateUserProfile,
   type FirebaseUser,
+  type PresentsJson,
   type UserProfile,
 } from '../firebase'
 
@@ -20,7 +21,7 @@ type RegisterPayload = {
   name: string
   discordName: string
   receiver: string
-  presents: unknown
+  presents: PresentsJson
   address: string
 }
 
@@ -51,7 +52,19 @@ export const useUserStore = defineStore('user', () => {
       return 'None'
     }
 
-    return typeof value === 'string' ? value : JSON.stringify(value)
+    if (Array.isArray(value)) {
+      return value
+        .map((item) => {
+          if (typeof item === 'object' && item !== null) {
+            const present = item as { headline?: string; link?: string; url?: string }
+            return `${present.headline || 'Untitled'} — ${present.link || 'Link'}: ${present.url || 'No URL'}`
+          }
+          return String(item)
+        })
+        .join('\n')
+    }
+
+    return typeof value === 'string' ? value : JSON.stringify(value, null, 2)
   }
 
   async function refreshProfile(user: FirebaseUser) {

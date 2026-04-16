@@ -3,6 +3,7 @@ import { storeToRefs } from 'pinia'
 import { reactive, watch } from 'vue'
 
 import { useUserStore } from './stores/user'
+import type { PresentsJson } from './firebase'
 
 const userStore = useUserStore()
 const { profile, error, success } = storeToRefs(userStore)
@@ -38,9 +39,9 @@ function formatPresents(value: unknown) {
 async function saveChanges() {
   userStore.resetMessages()
 
-  let presentsJson: unknown
+  let presentsJson: PresentsJson
   try {
-    presentsJson = form.presents.trim() ? JSON.parse(form.presents) : []
+    presentsJson = form.presents.trim() ? (JSON.parse(form.presents) as PresentsJson) : []
   } catch {
     error.value = 'Presents must be valid JSON.'
     return
@@ -92,7 +93,8 @@ async function saveChanges() {
 
         <label>
           Presents JSON
-          <textarea v-model="form.presents" rows="6"></textarea>
+          <textarea v-model="form.presents" rows="8"
+            placeholder='[{"headline":"Warm socks","link":"Wishlist","url":"https://example.com/item"}]'></textarea>
         </label>
 
         <button type="submit">Save profile</button>

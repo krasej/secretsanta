@@ -16,16 +16,13 @@ const form = reactive({
   password: '',
   name: '',
   discordName: '',
-  receiver: '',
-  presents: '["book", "socks"]',
-  address: '',
 })
 
 userStore.initializeAuth()
 
 watchEffect(async () => {
   if (isLoggedIn.value) {
-    await router.replace('/')
+    await router.replace('/my-profile')
   }
 })
 
@@ -34,17 +31,6 @@ function resetForm() {
   form.password = ''
   form.name = ''
   form.discordName = ''
-  form.receiver = ''
-  form.presents = '["book", "socks"]'
-  form.address = ''
-}
-
-function parsePresents(raw: string) {
-  if (!raw.trim()) {
-    return []
-  }
-
-  return JSON.parse(raw)
 }
 
 async function submitForm() {
@@ -64,22 +50,14 @@ async function submitForm() {
         return
       }
 
-      let presentsJson: unknown
-      try {
-        presentsJson = parsePresents(form.presents)
-      } catch {
-        error.value = 'Presents must be valid JSON.'
-        return
-      }
-
       await userStore.register({
         email: form.email,
         password: form.password,
         name: form.name,
         discordName: form.discordName,
-        receiver: form.receiver,
-        presents: presentsJson,
-        address: form.address,
+        receiver: '',
+        presents: [],
+        address: '',
       })
       resetForm()
     }
@@ -124,21 +102,6 @@ async function submitForm() {
           Discord Name
           <input v-model="form.discordName" required />
         </label>
-
-        <label>
-          Receiver / Giftee
-          <input v-model="form.receiver" />
-        </label>
-
-        <label>
-          Presents JSON
-          <textarea v-model="form.presents" rows="3"></textarea>
-        </label>
-
-        <label>
-          Your Address
-          <textarea v-model="form.address" rows="2"></textarea>
-        </label>
       </template>
 
       <button type="submit">{{ authMode === 'login' ? 'Sign in' : 'Register' }}</button>
@@ -150,13 +113,6 @@ async function submitForm() {
 </template>
 
 <style scoped>
-.auth-panel {
-  border: 1px solid #d0d4db;
-  border-radius: 14px;
-  padding: 1.5rem;
-  background: #fff;
-}
-
 .auth-switch {
   display: flex;
   gap: 0.5rem;

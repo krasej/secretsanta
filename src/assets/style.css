@@ -1,0 +1,88 @@
+@font-face {
+  font-family: 'Puppies Play';
+  src: url('/puppies-play-v11-latin-regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-display: swap;
+  font-family: 'Delius';
+  font-style: normal;
+  font-weight: 400;
+  src: url('/delius-v21-latin-regular.woff2') format('woff2');
+}
+
+:root {
+  --font-headline: 'Puppies Play', cursive;
+  --font-text: 'Delius', Arial, Helvetica, sans-serif;
+  --color-primary: #e4bd0f;
+  --border-radius: 5px;
+  --border-radius-lg: 10px;
+}
+
+html {
+  background-color: #333;
+  color: #fff;
+  font-family: var(--font-text);
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-headline);
+  color: var(--color-primary);
+}
+
+h1 {
+  font-size: 3rem;
+}
+
+h2 {
+  font-size: 2.5rem;
+}
+
+.app-shell {
+  display: grid;
+  gap: 2rem;
+  max-width: 920px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.top-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  border-bottom: 1px solid var(--color-primary);
+}
+
+.nav-links {
+  display: flex;
+  gap: 1rem;
+}
+
+.nav-links a {
+  color: var(--color-primary);
+  text-decoration: none;
+  font-size: 1.2rem;
+}
+
+.nav-links a:hover {
+  color: var(--color-primary);
+}
+
+.sign-out-button {
+  background-color: transparent;
+  border: 1px solid var(--color-primary);
+  color: var(--color-primary);
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  font-size: 1rem;
+  border-radius: var(--border-radius-lg);
+}
