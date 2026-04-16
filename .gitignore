@@ -28,6 +28,10 @@ coverage
 
 .eslintcache
 
+# local environment vars
+.env
+.env.local
+
 # Cypress
 /cypress/videos/
 /cypress/screenshots/
