@@ -31,16 +31,20 @@ const app = initializeApp(firebaseConfig)
 const auth = getAuth(app)
 const db = getFirestore(app)
 const usersCollection = collection(db, 'users')
+const privateProfilesCollection = collection(db, 'userPrivate')
+
+export type PresentsJson = unknown
 
 export type UserProfile = {
   id: string
-  email: string
   name: string
   discordName: string
-  giftee?: string | null
-  presents?: string | null
-  address?: string | null
+  receiver?: string | null
+  presents?: PresentsJson
   role?: 'admin' | 'user'
+  email?: string
+  address?: string | null
+  receiverAddress?: string | null
 }
 
 export type FirebaseUser = FirebaseAuthUser
@@ -53,15 +57,20 @@ export async function registerUser(
   const credential = await createUserWithEmailAndPassword(auth, email, password)
   const uid = credential.user.uid
 
-  await setDoc(doc(db, 'users', uid), {
-    email,
-    name: profile.name,
-    discordName: profile.discordName,
-    giftee: profile.giftee || null,
-    presents: profile.presents || null,
-    address: profile.address || null,
-    role: 'user',
-  })
+  await Promise.all([
+    setDoc(doc(db, 'users', uid), {
+      name: profile.name,
+      discordName: profile.discordName,
+      receiver: profile.receiver || null,
+      presents: profile.presents ?? [],
+      role: 'user',
+    }),
+    setDoc(doc(db, 'userPrivate', uid), {
+      email,
+      address: profile.address || null,
+      receiverAddress: profile.receiverAddress || null,
+    }),
+  ])
 
   return credential.user
 }
@@ -79,24 +88,97 @@ export function onAuthStateChange(callback: (user: FirebaseAuthUser | null) => v
   return onAuthStateChanged(auth, callback)
 }
 
-export async function getUserProfile(uid: string): Promise<UserProfile | null> {
-  const snapshot = await getDoc(doc(db, 'users', uid))
-  if (!snapshot.exists()) {
+export async function getUserProfile(
+  uid: string,
+  includePrivate = true,
+): Promise<UserProfile | null> {
+  const publicSnapshot = await getDoc(doc(db, 'users', uid))
+  if (!publicSnapshot.exists()) {
     return null
   }
 
-  return {
-    id: snapshot.id,
-    ...(snapshot.data() as Omit<UserProfile, 'id'>),
+  const profile = {
+    id: publicSnapshot.id,
+    ...(publicSnapshot.data() as Omit<UserProfile, 'id'>),
+  } as UserProfile
+
+  if (!includePrivate) {
+    return profile
   }
+
+  const privateSnapshot = await getDoc(doc(db, 'userPrivate', uid))
+  if (privateSnapshot.exists()) {
+    Object.assign(profile, privateSnapshot.data())
+  }
+
+  return profile
 }
 
-export async function getAllUsers(): Promise<UserProfile[]> {
+export async function getAllUsers(
+  options: { includePrivate?: boolean } = {},
+): Promise<UserProfile[]> {
   const snapshot = await getDocs(query(usersCollection, orderBy('name')))
-  return snapshot.docs.map((item) => ({
+  const profiles = snapshot.docs.map((item) => ({
     id: item.id,
     ...(item.data() as Omit<UserProfile, 'id'>),
   }))
+
+  if (!options.includePrivate) {
+    return profiles
+  }
+
+  return Promise.all(
+    profiles.map(async (profile) => {
+      const privateSnapshot = await getDoc(doc(privateProfilesCollection, profile.id))
+      if (privateSnapshot.exists()) {
+        return { ...profile, ...(privateSnapshot.data() as Partial<UserProfile>) }
+      }
+      return profile
+    }),
+  )
+}
+
+export async function updateUserProfile(uid: string, updates: Partial<UserProfile>) {
+  const publicUpdates: Partial<UserProfile> = {}
+  const privateUpdates: Partial<UserProfile> = {}
+
+  if (updates.name !== undefined) {
+    publicUpdates.name = updates.name
+  }
+  if (updates.discordName !== undefined) {
+    publicUpdates.discordName = updates.discordName
+  }
+  if (updates.receiver !== undefined) {
+    publicUpdates.receiver = updates.receiver
+  }
+  if (updates.presents !== undefined) {
+    publicUpdates.presents = updates.presents
+  }
+  if (updates.role !== undefined) {
+    publicUpdates.role = updates.role
+  }
+
+  if (updates.email !== undefined) {
+    privateUpdates.email = updates.email
+  }
+  if (updates.address !== undefined) {
+    privateUpdates.address = updates.address
+  }
+  if (updates.receiverAddress !== undefined) {
+    privateUpdates.receiverAddress = updates.receiverAddress
+  }
+
+  const writes: Promise<unknown>[] = []
+
+  if (Object.keys(publicUpdates).length > 0) {
+    writes.push(setDoc(doc(db, 'users', uid), publicUpdates, { merge: true }))
+  }
+
+  if (Object.keys(privateUpdates).length > 0) {
+    writes.push(setDoc(doc(db, 'userPrivate', uid), privateUpdates, { merge: true }))
+  }
+
+  await Promise.all(writes)
 }
 
 export function getCurrentUser() {
