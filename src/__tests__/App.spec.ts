@@ -1,11 +1,17 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, vi } from 'vitest'
 import { createPinia } from 'pinia'
 
 import { mount } from '@vue/test-utils'
 import App from '../App.vue'
 
+vi.mock('vue-router', () => ({
+  useRouter: () => ({
+    push: vi.fn(),
+  }),
+}))
+
 describe('App', () => {
-  it('mounts renders properly', () => {
+  it('renders the app shell', () => {
     const wrapper = mount(App, {
       global: {
         plugins: [createPinia()],
@@ -13,6 +19,7 @@ describe('App', () => {
       },
     })
 
-    expect(wrapper.html()).toContain('router-link-stub')
+    expect(wrapper.html()).toContain('app-shell')
+    expect(wrapper.html()).toContain('router-view-stub')
   })
 })

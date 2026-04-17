@@ -6,7 +6,7 @@ import MyProfile from '../MyProfile.vue'
 import { getCurrentUser } from '../firebase'
 
 const routes = [
-  { path: '/', component: Home },
+  { path: '/', component: Home, meta: { requiresAuth: true } },
   { path: '/login', component: AuthPage, meta: { guestOnly: true } },
   { path: '/my-profile', component: MyProfile, meta: { requiresAuth: true } },
 ]

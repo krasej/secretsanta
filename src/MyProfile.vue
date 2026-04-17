@@ -2,6 +2,7 @@
 import { storeToRefs } from 'pinia'
 import { reactive, watch } from 'vue'
 
+import Present from './components/Present.vue'
 import { useUserStore } from './stores/user'
 import type { PresentsJson } from './firebase'
 
@@ -32,10 +33,6 @@ watch(
   { immediate: true },
 )
 
-function formatPresents(value: unknown) {
-  return userStore.formatPresents(value)
-}
-
 async function saveChanges() {
   userStore.resetMessages()
 
@@ -63,17 +60,31 @@ async function saveChanges() {
 <template>
   <section>
     <h1>My Profile</h1>
-    <p>This is where you can view and edit your profile details.</p>
+    <p>This is where you can view and edit your profile and see your wishes</p>
 
     <div v-if="profile" class="profile-card current-profile">
-      <h2>Your private profile</h2>
+      <h2>Your wishes!</h2>
+
+      <div class="present-cards">
+        <template v-for="(present, i) in profile.presents" :key="i">
+          <Present :present="present" :index="i" :enable-editing="true" />
+        </template>
+      </div>
+
+
+      <h2>Your profile</h2>
+
       <div><strong>{{ profile.name }}</strong> ({{ profile.discordName }})</div>
       <div>Email: {{ profile.email || 'None' }}</div>
       <div>Your address: {{ profile.address || 'None' }}</div>
       <div>Receiver: {{ profile.receiver || 'Not assigned' }}</div>
       <div>Receiver address: {{ profile.receiverAddress || 'Not assigned yet' }}</div>
-      <div>Presents: <span class="json-value">{{ formatPresents(profile.presents) }}</span></div>
-      <div>Role: {{ profile.role || 'user' }}</div>
+
+
+
+      <h3>Update your profile</h3>
+
+
 
       <form class="edit-form" @submit.prevent="saveChanges">
         <label>
@@ -89,12 +100,6 @@ async function saveChanges() {
         <label>
           Address
           <textarea v-model="form.address" rows="2"></textarea>
-        </label>
-
-        <label>
-          Presents JSON
-          <textarea v-model="form.presents" rows="8"
-            placeholder='[{"headline":"Warm socks","link":"Wishlist","url":"https://example.com/item"}]'></textarea>
         </label>
 
         <button type="submit">Save profile</button>

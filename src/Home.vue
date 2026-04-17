@@ -1,15 +1,28 @@
+<script setup lang="ts">
+import { useUserStore } from './stores/user'
+
+import Present from './components/Present.vue'
+
+const userStore = useUserStore()
+</script>
+
+
 <template>
   <section class="home-panel">
     <h1>Home</h1>
-    <p>Welcome to the Secret Santa app.</p>
+    <p>Welcome to the BSC Secret Santa app. Here is everyone participating!</p>
+
+
+    <div class="profile-cards">
+      <div v-for="(user, i) in userStore.users" :key="i" class="profile-card">
+        <h2>{{ user.name }}</h2>
+        <div><strong>{{ user.name }}</strong> ({{ user.discordName }})</div>
+
+
+        <template v-for="(present, i) in user.presents" :key="i">
+          <Present :present="present" />
+        </template>
+      </div>
+    </div>
   </section>
 </template>
-
-<style scoped>
-.home-panel {
-  border: 1px solid #d0d4db;
-  border-radius: 14px;
-  padding: 1.5rem;
-  background: #fff;
-}
-</style>
