@@ -73,7 +73,7 @@ async function submitForm() {
     <p>Sign in to continue, or register if you do not have an account yet.</p>
 
     <div class="auth-switch">
-      <button type="button" :class="{ active: authMode === 'login' }" @click="authMode = 'login'">
+      <button type="button" class="primary" :class="{ active: authMode === 'login' }" @click="authMode = 'login'">
         Login
       </button>
       <button type="button" :class="{ active: authMode === 'register' }" @click="authMode = 'register'">
@@ -104,7 +104,7 @@ async function submitForm() {
         </label>
       </template>
 
-      <button type="submit">{{ authMode === 'login' ? 'Sign in' : 'Register' }}</button>
+      <button class="primary" type="submit">{{ authMode === 'login' ? 'Sign in' : 'Register' }}</button>
     </form>
 
     <div v-if="error" class="message error">{{ error }}</div>
@@ -117,67 +117,5 @@ async function submitForm() {
   display: flex;
   gap: 0.5rem;
   margin-bottom: 1rem;
-}
-
-.auth-switch button {
-  background: white;
-  color: #1f2937;
-  border: 1px solid #cbd5e1;
-}
-
-.auth-switch button.active {
-  background: #3b82f6;
-  color: white;
-}
-
-form {
-  display: grid;
-  gap: 1rem;
-}
-
-label {
-  display: grid;
-  gap: 0.5rem;
-  font-weight: 600;
-}
-
-input,
-textarea {
-  width: 100%;
-  padding: 0.75rem;
-  border: 1px solid #c0c4cc;
-  border-radius: 8px;
-  font: inherit;
-}
-
-button {
-  width: fit-content;
-  padding: 0.9rem 1.4rem;
-  border: none;
-  border-radius: 999px;
-  background: #3b82f6;
-  color: white;
-  font-weight: 700;
-  cursor: pointer;
-}
-
-button:hover {
-  background: #2563eb;
-}
-
-.message {
-  margin-top: 1rem;
-  padding: 0.9rem 1rem;
-  border-radius: 10px;
-}
-
-.error {
-  background: #fee2e2;
-  color: #991b1b;
-}
-
-.success {
-  background: #ecfdf5;
-  color: #166534;
 }
 </style>

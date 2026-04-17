@@ -17,9 +17,12 @@
 :root {
   --font-headline: 'Delius', cursive;
   --font-text: 'Delius', Arial, Helvetica, sans-serif;
-  --color-primary: #e4bd0f;
+  --color-secondary: #e4bd0f;
+  --color-secondary-bright: #ebd266;
+  --color-primary: #b30422;
+  --color-primary-bright: #fa4664;
   --border-radius: 5px;
-  --border-radius-lg: 10px;
+  --border-radius-lg: 15px;
 }
 
 html {
@@ -35,7 +38,7 @@ h4,
 h5,
 h6 {
   font-family: var(--font-headline);
-  color: var(--color-primary);
+  color: var(--color-secondary);
 }
 
 h1 {
@@ -63,7 +66,7 @@ h3 {
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  border-bottom: 1px solid var(--color-primary);
+  border-bottom: 1px solid var(--color-secondary);
 }
 
 .nav-links {
@@ -72,7 +75,7 @@ h3 {
 }
 
 .nav-links a {
-  color: var(--color-primary);
+  color: var(--color-secondary);
   text-decoration: none;
   font-size: 1.2rem;
 }
@@ -83,8 +86,8 @@ h3 {
 
 .sign-out-button {
   background-color: transparent;
-  border: 1px solid var(--color-primary);
-  color: var(--color-primary);
+  border: 1px solid var(--color-secondary);
+  color: var(--color-secondary);
   padding: 0.5rem 1rem;
   cursor: pointer;
   font-size: 1rem;
@@ -144,7 +147,7 @@ h3 {
 }
 
 .present-card .edit-button {
-  background: var(--color-primary);
+  background: var(--color-secondary);
   border: none;
   padding: 0.25rem 0.5rem;
   cursor: pointer;
@@ -166,5 +169,39 @@ label {
 label input,
 label textarea {
   border-radius: var(--border-radius);
-  padding: 5px;
+  padding: 10px;
+  font-size: 1rem;
+}
+
+button {
+  width: fit-content;
+  border-radius: var(--border-radius-lg);
+  font-size: 1.2rem;
+  padding: 0.5rem 1rem;
+  background-color: transparent;
+  color: #fff;
+  border: 1px solid var(--color-secondary);
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+button.primary {
+  background-color: var(--color-primary);
+  border-color: var(--color-primary);
+  color: #fff;
+}
+
+button.primary:hover {
+  background-color: var(--color-primary-bright);
+}
+
+button.secondary {
+  background-color: var(--color-secondary);
+  border-color: var(--color-secondary);
+  color: #fff;
+}
+
+button.secondary:hover {
+  background-color: var(--color-secondary-bright);
+  border-color: var(--color-secondary-bright);
 }
