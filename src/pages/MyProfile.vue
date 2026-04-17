@@ -2,8 +2,8 @@
 import { storeToRefs } from 'pinia'
 import { reactive, watch } from 'vue'
 
-import Present from './components/Present.vue'
-import { useUserStore } from './stores/user'
+import Present from '../components/Present.vue'
+import { useUserStore } from '../stores/user'
 
 const userStore = useUserStore()
 const { profile, error, success } = storeToRefs(userStore)
