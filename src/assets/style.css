@@ -53,6 +53,15 @@ h3 {
   font-size: 1.5rem;
 }
 
+a {
+  color: var(--color-secondary);
+  text-decoration: none;
+}
+
+a:hover {
+  color: var(--color-secondary-bright);
+}
+
 .app-shell {
   display: grid;
   gap: 2rem;

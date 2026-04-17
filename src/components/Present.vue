@@ -197,8 +197,7 @@ onMounted(async () => {
 
 <style scoped>
 .present-description {
-  margin: 0;
-  color: #4b5563;
+  margin: 1rem 0;
   font-size: 0.95rem;
 }
 
