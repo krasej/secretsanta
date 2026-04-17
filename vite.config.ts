@@ -7,9 +7,10 @@ import vueDevTools from 'vite-plugin-vue-devtools'
 // https://vite.dev/config/
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '')
+  const base = env.VITE_BASE_URL?.trim() || '/secretsanta/'
 
   return {
-    base: env.VITE_BASE_URL || '/',
+    base: base.endsWith('/') ? base : `${base}/`,
     plugins: [vue(), vueDevTools()],
     resolve: {
       alias: {
