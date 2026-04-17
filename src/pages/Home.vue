@@ -18,11 +18,20 @@ const userStore = useUserStore()
         <h2>{{ user.name }}</h2>
         <div><strong>{{ user.name }}</strong> ({{ user.discordName }})</div>
 
-
-        <template v-for="(present, i) in user.presents" :key="i">
-          <Present :present="present" />
-        </template>
+        <div class="present-cards">
+          <template v-for="(present, i) in user.presents" :key="i">
+            <Present :present="present" />
+          </template>
+        </div>
       </div>
     </div>
   </section>
 </template>
+
+<style lang="css" scoped>
+@media screen and (min-width:980px) {
+  .present-cards {
+    grid-template-columns: 1fr 1fr 1fr;
+  }
+}
+</style>

@@ -20,9 +20,11 @@ type RegisterPayload = {
   password: string
   name: string
   discordName: string
-  receiver: string
-  presents: PresentsJson
-  address: string
+  receiver?: string
+  presents?: PresentsJson
+  address?: string
+  hasSecretSanta?: boolean
+  excludedReceiverIds?: string[]
 }
 
 export const useUserStore = defineStore('user', () => {
@@ -92,10 +94,12 @@ export const useUserStore = defineStore('user', () => {
     currentUser.value = await registerUser(payload.email, payload.password, {
       name: payload.name,
       discordName: payload.discordName,
-      receiver: payload.receiver,
-      presents: payload.presents,
-      address: payload.address,
+      receiver: payload.receiver ?? '',
+      presents: payload.presents ?? [],
+      address: payload.address ?? '',
       receiverAddress: null,
+      hasSecretSanta: payload.hasSecretSanta ?? false,
+      excludedReceiverIds: payload.excludedReceiverIds ?? [],
     })
 
     if (currentUser.value) {
@@ -116,6 +120,16 @@ export const useUserStore = defineStore('user', () => {
     await refreshProfile(currentUser.value)
     await refreshUsers()
     success.value = 'Profile saved successfully.'
+  }
+
+  async function setUserHasSecretSanta(userId: string, value = true) {
+    await updateUserProfile(userId, { hasSecretSanta: value })
+
+    if (currentUser.value) {
+      await refreshProfile(currentUser.value)
+    }
+
+    await refreshUsers()
   }
 
   async function logout() {
@@ -168,6 +182,7 @@ export const useUserStore = defineStore('user', () => {
     login,
     register,
     saveProfile,
+    setUserHasSecretSanta,
     logout,
     refreshProfile,
     refreshUsers,

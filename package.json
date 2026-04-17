@@ -9,6 +9,7 @@
     "preview": "vite preview",
     "test:unit": "vitest",
     "seed:sample-users": "node scripts/seed-sample-users.mjs",
+    "remove:sample-users": "node scripts/remove-sample-users.mjs",
     "build-only": "vite build",
     "type-check": "vue-tsc --build",
     "predeploy": "yarn build",

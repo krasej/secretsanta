@@ -52,6 +52,8 @@ export type UserProfile = {
   email?: string
   address?: string | null
   receiverAddress?: string | null
+  hasSecretSanta?: boolean
+  excludedReceiverIds?: string[]
 }
 
 export type FirebaseUser = FirebaseAuthUser
@@ -68,14 +70,16 @@ export async function registerUser(
     setDoc(doc(db, 'users', uid), {
       name: profile.name,
       discordName: profile.discordName,
+      address: profile.address || null,
       receiver: profile.receiver || null,
+      receiverAddress: profile.receiverAddress || null,
       presents: profile.presents ?? [],
       role: 'user',
+      hasSecretSanta: profile.hasSecretSanta ?? false,
     }),
     setDoc(doc(db, 'userPrivate', uid), {
       email,
-      address: profile.address || null,
-      receiverAddress: profile.receiverAddress || null,
+      excludedReceiverIds: profile.excludedReceiverIds ?? [],
     }),
   ])
 
@@ -155,6 +159,9 @@ export async function updateUserProfile(uid: string, updates: Partial<UserProfil
   if (updates.discordName !== undefined) {
     publicUpdates.discordName = updates.discordName
   }
+  if (updates.address !== undefined) {
+    publicUpdates.address = updates.address
+  }
   if (updates.receiver !== undefined) {
     publicUpdates.receiver = updates.receiver
   }
@@ -164,15 +171,19 @@ export async function updateUserProfile(uid: string, updates: Partial<UserProfil
   if (updates.role !== undefined) {
     publicUpdates.role = updates.role
   }
+  if (updates.hasSecretSanta !== undefined) {
+    publicUpdates.hasSecretSanta = updates.hasSecretSanta
+  }
+  if (updates.receiverAddress !== undefined) {
+    publicUpdates.receiverAddress = updates.receiverAddress
+  }
 
   if (updates.email !== undefined) {
     privateUpdates.email = updates.email
   }
-  if (updates.address !== undefined) {
-    privateUpdates.address = updates.address
-  }
-  if (updates.receiverAddress !== undefined) {
-    privateUpdates.receiverAddress = updates.receiverAddress
+
+  if (updates.excludedReceiverIds !== undefined) {
+    privateUpdates.excludedReceiverIds = updates.excludedReceiverIds
   }
 
   const writes: Promise<unknown>[] = []

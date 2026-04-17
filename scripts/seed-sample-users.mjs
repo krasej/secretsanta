@@ -45,7 +45,10 @@ const sampleUsers = [
     publicProfile: {
       name: 'Emma Frosting',
       discordName: 'emma_cookies',
+      address: '12 Candy Cane Lane',
       receiver: null,
+      receiverAddress: null,
+      hasSecretSanta: false,
       presents: [
         {
           headline: 'Cozy Blanket',
@@ -65,8 +68,7 @@ const sampleUsers = [
       role: 'user',
     },
     privateProfile: {
-      address: '12 Candy Cane Lane',
-      receiverAddress: null,
+      excludedReceiverIds: [],
     },
   },
   {
@@ -75,7 +77,10 @@ const sampleUsers = [
     publicProfile: {
       name: 'Leo Lantern',
       discordName: 'leo_gifts',
+      address: '88 Winter Oak Road',
       receiver: null,
+      receiverAddress: null,
+      hasSecretSanta: false,
       presents: [
         {
           headline: 'Desk Lamp',
@@ -88,8 +93,7 @@ const sampleUsers = [
       role: 'user',
     },
     privateProfile: {
-      address: '88 Winter Oak Road',
-      receiverAddress: null,
+      excludedReceiverIds: [],
     },
   },
   {
@@ -98,7 +102,10 @@ const sampleUsers = [
     publicProfile: {
       name: 'Nina Snow',
       discordName: 'ninaflakes',
+      address: '5 Snowdrop Court',
       receiver: null,
+      receiverAddress: null,
+      hasSecretSanta: false,
       presents: [
         {
           headline: 'Tea Sampler',
@@ -111,8 +118,7 @@ const sampleUsers = [
       role: 'user',
     },
     privateProfile: {
-      address: '5 Snowdrop Court',
-      receiverAddress: null,
+      excludedReceiverIds: [],
     },
   },
 ]

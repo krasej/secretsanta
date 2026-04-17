@@ -19,11 +19,12 @@ async function handleSignOut() {
 
 <template>
   <main class="app-shell">
-    <nav class="top-nav">
-      <div v-if="isLoggedIn" class="nav-links">
+    <nav v-if="isLoggedIn" class="top-nav">
+      <div class="nav-links">
         <RouterLink to="/">Home</RouterLink>
         <RouterLink to="/my-profile">My Profile</RouterLink>
         <RouterLink v-if="isAdmin" to="/my-profile">Admin</RouterLink>
+        <RouterLink to="/your-giftee">Your Giftee</RouterLink>
       </div>
       <button class="sign-out-button" v-if="isLoggedIn" type="button" @click="handleSignOut">Sign out</button>
     </nav>

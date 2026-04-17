@@ -143,10 +143,10 @@ async function saveChanges() {
   </section>
 </template>
 
-<style scoped>
-.message {
-  margin-top: 1rem;
-  padding: 0.9rem 1rem;
-  border-radius: 10px;
+<style lang="css" scoped>
+@media screen and (min-width:980px) {
+  .present-cards {
+    grid-template-columns: 1fr 1fr;
+  }
 }
 </style>
