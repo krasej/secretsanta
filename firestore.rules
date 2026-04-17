@@ -19,14 +19,14 @@ service cloud.firestore {
       allow create: if isOwner(userId);
       allow read: if signedIn();
       allow update: if isOwner(userId) || isAdmin();
-      allow delete: if isAdmin();
+      allow delete: if isOwner(userId) || if isAdmin();
     }
 
     match /userPrivate/{userId} {
       allow create: if isOwner(userId);
       allow read: if isOwner(userId) || isAdmin();
       allow update: if isOwner(userId) || isAdmin();
-      allow delete: if isAdmin();
+      allow delete: if isOwner(userId) || if isAdmin();
     }
   }
 }

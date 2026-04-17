@@ -4,18 +4,21 @@ import { reactive, watch } from 'vue'
 
 import Present from './components/Present.vue'
 import { useUserStore } from './stores/user'
-import type { PresentsJson } from './firebase'
 
 const userStore = useUserStore()
 const { profile, error, success } = storeToRefs(userStore)
+const presentForm = reactive({
+  headline: '',
+  description: '',
+  url: '',
+})
 
 userStore.initializeAuth()
 
-const form = reactive({
+const userForm = reactive({
   name: '',
   discordName: '',
   address: '',
-  presents: '[]',
 })
 
 watch(
@@ -25,31 +28,47 @@ watch(
       return
     }
 
-    form.name = value.name || ''
-    form.discordName = value.discordName || ''
-    form.address = value.address || ''
-    form.presents = JSON.stringify(value.presents ?? [], null, 2)
+    userForm.name = value.name || ''
+    userForm.discordName = value.discordName || ''
+    userForm.address = value.address || ''
   },
   { immediate: true },
 )
 
-async function saveChanges() {
-  userStore.resetMessages()
-
-  let presentsJson: PresentsJson
-  try {
-    presentsJson = form.presents.trim() ? (JSON.parse(form.presents) as PresentsJson) : []
-  } catch {
-    error.value = 'Presents must be valid JSON.'
+async function savePresent() {
+  if (!presentForm.headline) {
+    error.value = 'Headline is required for a wish.'
     return
   }
 
+
+  userStore.resetMessages()
+
+  await userStore.saveProfile({
+    presents: [
+      ...(profile.value?.presents || []),
+      {
+        headline: presentForm.headline,
+        description: presentForm.description,
+        url: presentForm.url,
+      },
+
+    ],
+  })
+
+  presentForm.headline = ''
+  presentForm.description = ''
+  presentForm.url = ''
+}
+
+async function saveChanges() {
+  userStore.resetMessages()
+
   try {
     await userStore.saveProfile({
-      name: form.name,
-      discordName: form.discordName,
-      address: form.address,
-      presents: presentsJson,
+      name: userForm.name,
+      discordName: userForm.discordName,
+      address: userForm.address
     })
   } catch {
     error.value = 'Unable to save your profile.'
@@ -58,6 +77,7 @@ async function saveChanges() {
 </script>
 
 <template>
+
   <section>
     <h1>My Profile</h1>
     <p>This is where you can view and edit your profile and see your wishes</p>
@@ -70,6 +90,22 @@ async function saveChanges() {
           <Present :present="present" :index="i" :enable-editing="true" />
         </template>
       </div>
+
+      <h3>Add a wish!</h3>
+
+      <form class="present-form" @submit.prevent="savePresent">
+        <label>
+          What: <input v-model="presentForm.headline" />
+        </label>
+        <label>
+          Description: <textarea v-model="presentForm.description" rows="2"></textarea>
+        </label>
+        <label>
+          URL: <input v-model="presentForm.url" />
+        </label>
+
+        <button type="submit">Save Wish!</button>
+      </form>
 
 
       <h2>Your profile</h2>
@@ -84,22 +120,23 @@ async function saveChanges() {
 
       <h3>Update your profile</h3>
 
+      {{ profile.presents }}
 
 
       <form class="edit-form" @submit.prevent="saveChanges">
         <label>
           Name
-          <input v-model="form.name" />
+          <input v-model="userForm.name" />
         </label>
 
         <label>
           Discord Name
-          <input v-model="form.discordName" />
+          <input v-model="userForm.discordName" />
         </label>
 
         <label>
           Address
-          <textarea v-model="form.address" rows="2"></textarea>
+          <textarea v-model="userForm.address" rows="2"></textarea>
         </label>
 
         <button type="submit">Save profile</button>
@@ -112,56 +149,9 @@ async function saveChanges() {
 </template>
 
 <style scoped>
-.edit-form {
-  display: grid;
-  gap: 1rem;
-  margin-top: 1rem;
-}
-
-label {
-  display: grid;
-  gap: 0.4rem;
-  font-weight: 600;
-}
-
-input,
-textarea {
-  width: 100%;
-  padding: 0.75rem;
-  border: 1px solid #c0c4cc;
-  border-radius: 8px;
-  font: inherit;
-}
-
-button {
-  width: fit-content;
-  padding: 0.8rem 1.2rem;
-  border: none;
-  border-radius: 999px;
-  background: #3b82f6;
-  color: white;
-  font-weight: 700;
-  cursor: pointer;
-}
-
 .message {
   margin-top: 1rem;
   padding: 0.9rem 1rem;
   border-radius: 10px;
-}
-
-.error {
-  background: #fee2e2;
-  color: #991b1b;
-}
-
-.success {
-  background: #ecfdf5;
-  color: #166534;
-}
-
-.json-value {
-  white-space: pre-wrap;
-  word-break: break-word;
 }
 </style>

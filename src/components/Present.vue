@@ -21,9 +21,25 @@ const isEditing = ref(false)
 const editablePresent = reactive<PresentItem>({
   headline: props.present.headline,
   description: props.present.description,
-  link: props.present.link,
   url: props.present.url,
   image: props.present.image ?? null,
+})
+
+const shortenedUrl = computed(() => {
+  if (!props.present.url) {
+    return ''
+  }
+
+  let shortenedUrl = props.present.url
+
+  shortenedUrl = shortenedUrl.replace(/^https?:\/\//, '')
+  shortenedUrl = shortenedUrl.replace(/^http?:\/\//, '')
+
+  if (shortenedUrl.length > 50) {
+    shortenedUrl = shortenedUrl.slice(0, 47) + '...'
+  }
+
+  return shortenedUrl
 })
 
 const hasImage = computed(() => Boolean(previewImage.value))
@@ -112,7 +128,6 @@ async function saveEdits() {
 function cancelEdits() {
   editablePresent.headline = props.present.headline
   editablePresent.description = props.present.description
-  editablePresent.link = props.present.link
   editablePresent.url = props.present.url
   editablePresent.image = props.present.image ?? null
   isEditing.value = false
@@ -155,11 +170,6 @@ onMounted(async () => {
         </label>
 
         <label>
-          Link text
-          <input v-model="editablePresent.link" />
-        </label>
-
-        <label>
           URL
           <input v-model="editablePresent.url" />
         </label>
@@ -178,7 +188,7 @@ onMounted(async () => {
         </div>
 
         <p v-if="present.description" class="present-description">{{ present.description }}</p>
-        <a :href="present.url" target="_blank" rel="noopener noreferrer">{{ present.link }}</a>
+        <a :href="present.url" target="_blank" rel="noopener noreferrer">{{ shortenedUrl }}</a>
       </div>
 
     </div>

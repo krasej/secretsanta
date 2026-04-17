@@ -36,7 +36,6 @@ const privateProfilesCollection = collection(db, 'userPrivate')
 export type PresentItem = {
   headline: string
   description?: string
-  link: string
   url: string
   image?: string | null
 }
