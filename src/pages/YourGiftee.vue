@@ -47,7 +47,7 @@ async function assignGiftee() {
   const selectedUser = eligibleUsers.value[Math.floor(Math.random() * eligibleUsers.value.length)]
 
   if (!selectedUser) {
-    error.value = 'No eligible giftees are available right now.'
+    error.value = 'No eligible giftees are available right now. :c'
     return
   }
 
