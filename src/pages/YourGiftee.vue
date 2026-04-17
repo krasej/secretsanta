@@ -66,7 +66,7 @@ async function assignGiftee() {
     <h1>Your Giftee</h1>
 
     <div v-if="profile?.receiver">
-      <p>You are buying for <strong>{{ profile.receiver }}</strong>.</p>
+      <p>You are buying a great gift for <strong>{{ profile.receiver }}</strong>.</p>
       <p>Delivery address: {{ profile.receiverAddress || receiverProfile?.address || 'Not assigned yet' }}</p>
 
       <div v-if="receiverProfile?.presents?.length" class="present-cards">
