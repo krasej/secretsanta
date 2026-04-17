@@ -79,7 +79,7 @@ async function saveChanges() {
 <template>
 
   <section>
-    <h1>My Profile</h1>
+    <h1>Your Profile</h1>
     <p>This is where you can view and edit your profile and see your wishes</p>
 
     <div v-if="profile" class="profile-card current-profile">
