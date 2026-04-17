@@ -116,26 +116,21 @@ async function saveChanges() {
       <div>Receiver: {{ profile.receiver || 'Not assigned' }}</div>
       <div>Receiver address: {{ profile.receiverAddress || 'Not assigned yet' }}</div>
 
-
-
       <h3>Update your profile</h3>
-
-      {{ profile.presents }}
-
 
       <form class="edit-form" @submit.prevent="saveChanges">
         <label>
-          Name
+          <span class="text">Name</span>
           <input v-model="userForm.name" />
         </label>
 
         <label>
-          Discord Name
+          <span class="text">Discord Name</span>
           <input v-model="userForm.discordName" />
         </label>
 
         <label>
-          Address
+          <span class="text">Address</span>
           <textarea v-model="userForm.address" rows="2"></textarea>
         </label>
 

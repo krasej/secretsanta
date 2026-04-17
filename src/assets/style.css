@@ -151,3 +151,20 @@ h3 {
   font-size: 0.8rem;
   border-radius: var(--border-radius);
 }
+
+form {
+  display: grid;
+}
+
+label {
+  display: grid;
+  grid-template-columns: 160px auto;
+  gap: 0.25rem;
+  margin-bottom: 1rem;
+}
+
+label input,
+label textarea {
+  border-radius: var(--border-radius);
+  padding: 5px;
+}
