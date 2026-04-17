@@ -171,7 +171,7 @@ onMounted(async () => {
 
         <label>
           URL
-          <input v-model="editablePresent.url" />
+          <input type="url" v-model="editablePresent.url" />
         </label>
 
         <div>

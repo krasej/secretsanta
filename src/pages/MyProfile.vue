@@ -101,7 +101,7 @@ async function saveChanges() {
           Description: <textarea v-model="presentForm.description" rows="2"></textarea>
         </label>
         <label>
-          URL: <input v-model="presentForm.url" />
+          URL: <input type="url" v-model="presentForm.url" />
         </label>
 
         <button type="submit" class="primary">Save Wish!</button>
