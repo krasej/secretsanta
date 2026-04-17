@@ -1,8 +1,8 @@
 import { createRouter, createWebHistory } from 'vue-router'
 
-import AuthPage from '../Auth.vue'
-import Home from '../Home.vue'
-import MyProfile from '../MyProfile.vue'
+import AuthPage from '../pages/Auth.vue'
+import Home from '../pages/Home.vue'
+import MyProfile from '../pages/MyProfile.vue'
 import { getCurrentUser } from '../firebase'
 
 const routes = [
