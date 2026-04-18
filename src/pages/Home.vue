@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useUserStore } from '../stores/user'
 
-import Present from '../components/Present.vue'
+import Present from '../components/PresentBlock.vue'
 
 const userStore = useUserStore()
 </script>

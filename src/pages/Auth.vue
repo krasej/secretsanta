@@ -5,10 +5,11 @@ import { reactive, ref, watchEffect } from 'vue'
 import { useRouter } from 'vue-router'
 
 import { useUserStore } from '../stores/user'
+import MessageBlock from '@/components/MessageBlock.vue'
 
 const router = useRouter()
 const userStore = useUserStore()
-const { error, success, isLoggedIn } = storeToRefs(userStore)
+const { error, isLoggedIn } = storeToRefs(userStore)
 
 const authMode = ref<'login' | 'register'>('login')
 const form = reactive({
@@ -72,6 +73,8 @@ async function submitForm() {
     <h1>Login</h1>
     <p>Sign in to continue, or register if you do not have an account yet.</p>
 
+    <MessageBlock v-if="error" :message="error" type="error" />
+
     <div class="auth-switch">
       <button type="button" class="primary" :class="{ active: authMode === 'login' }" @click="authMode = 'login'">
         Login
@@ -106,9 +109,6 @@ async function submitForm() {
 
       <button class="primary" type="submit">{{ authMode === 'login' ? 'Sign in' : 'Register' }}</button>
     </form>
-
-    <div v-if="error" class="message error">{{ error }}</div>
-    <div v-if="success" class="message success">{{ success }}</div>
   </section>
 </template>
 

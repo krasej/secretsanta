@@ -23,6 +23,16 @@
   --color-primary-bright: #fa4664;
   --border-radius: 5px;
   --border-radius-lg: 15px;
+
+  --color-error: var(--color-primary);
+  --color-error-light: var(--color-primary-bright);
+
+  --color-warning: var(--color-secondary);
+  --color-warning-light: var(--color-secondary-bright);
+
+  --color-success: #28a745;
+  --color-success-light: #91eba6;
+  --color-success-text: #1d552a;
 }
 
 html {

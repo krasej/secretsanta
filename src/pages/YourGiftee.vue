@@ -2,7 +2,7 @@
 import { computed } from 'vue'
 import { storeToRefs } from 'pinia'
 
-import Present from '../components/Present.vue'
+import Present from '../components/PresentBlock.vue'
 import { useUserStore } from '../stores/user'
 
 const userStore = useUserStore()

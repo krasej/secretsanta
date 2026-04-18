@@ -2,7 +2,8 @@
 import { storeToRefs } from 'pinia'
 import { reactive, watch } from 'vue'
 
-import Present from '../components/Present.vue'
+import PresentBlock from '../components/PresentBlock.vue'
+import MessageBlock from '../components/MessageBlock.vue'
 import { useUserStore } from '../stores/user'
 
 const userStore = useUserStore()
@@ -87,7 +88,7 @@ async function saveChanges() {
 
       <div class="present-cards">
         <template v-for="(present, i) in profile.presents" :key="i">
-          <Present :present="present" :index="i" :enable-editing="true" />
+          <PresentBlock :present="present" :index="i" :enable-editing="true" />
         </template>
       </div>
 
@@ -118,6 +119,9 @@ async function saveChanges() {
 
       <h3>Update your profile</h3>
 
+      <MessageBlock v-if="error" :message="error" type="error" />
+      <MessageBlock v-if="success" :message="success" type="success" />
+
       <form class="edit-form" @submit.prevent="saveChanges">
         <label>
           <span class="text">Name</span>
@@ -137,8 +141,6 @@ async function saveChanges() {
         <button type="submit" class="secondarycolor">Save profile</button>
       </form>
 
-      <div v-if="error" class="message error">{{ error }}</div>
-      <div v-if="success" class="message success">{{ success }}</div>
     </div>
   </section>
 </template>
