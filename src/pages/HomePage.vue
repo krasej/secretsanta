@@ -12,7 +12,6 @@ const userStore = useUserStore()
     <h1>Home</h1>
     <p>Welcome to the BSC Secret Santa app. Here is everyone participating!</p>
 
-
     <div class="profile-cards">
       <div v-for="(user, i) in userStore.users" :key="i" class="profile-card">
         <h2>{{ user.name }}</h2>

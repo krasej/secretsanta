@@ -70,7 +70,8 @@ async function submitForm() {
 
 <template>
   <section class="auth-panel">
-    <h1>Login</h1>
+    <h1>Welcome to Secret Santa</h1>
+    <h2>Login</h2>
     <p>Sign in to continue, or register if you do not have an account yet.</p>
 
     <MessageBlock v-if="error" :message="error" type="error" />
@@ -79,7 +80,8 @@ async function submitForm() {
       <button type="button" class="primary" :class="{ active: authMode === 'login' }" @click="authMode = 'login'">
         Login
       </button>
-      <button type="button" :class="{ active: authMode === 'register' }" @click="authMode = 'register'">
+      <button type="button" class="register" :class="{ active: authMode === 'register' }"
+        @click="authMode = 'register'">
         Register
       </button>
     </div>
@@ -116,6 +118,16 @@ async function submitForm() {
 .auth-switch {
   display: flex;
   gap: 0.5rem;
-  margin-bottom: 1rem;
+  margin-bottom: 2rem;
+}
+
+.auth-switch .primary:not(.active) {
+  background-color: transparent;
+}
+
+
+.auth-switch .register.active {
+  background-color: var(--color-secondary);
+  color: white;
 }
 </style>

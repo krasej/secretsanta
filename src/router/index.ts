@@ -1,16 +1,17 @@
 import { createRouter, createWebHistory } from 'vue-router'
 
-import AuthPage from '../pages/Auth.vue'
-import Home from '../pages/Home.vue'
-import MyProfile from '../pages/MyProfile.vue'
-import YourGiftee from '../pages/YourGiftee.vue'
 import { getCurrentUser } from '../firebase'
+import AuthPage from '../pages/AuthPage.vue'
+import Home from '../pages/HomePage.vue'
+import MyProfile from '../pages/ProfilePage.vue'
+import YourGiftee from '../pages/RecieverPage.vue'
 
 const routes = [
   { path: '/', component: Home, meta: { requiresAuth: true } },
   { path: '/login', component: AuthPage, meta: { guestOnly: true } },
   { path: '/my-profile', component: MyProfile, meta: { requiresAuth: true } },
   { path: '/your-giftee', component: YourGiftee, meta: { requiresAuth: true } },
+  { path: '/:pathMatch(.*)*', redirect: '/' },
 ]
 
 const router = createRouter({
