@@ -106,8 +106,6 @@ export const useUserStore = defineStore('user', () => {
       await refreshProfile(currentUser.value)
       await refreshUsers()
     }
-
-    success.value = 'Account created successfully.'
   }
 
   async function saveProfile(updates: Partial<UserProfile>) {
@@ -119,7 +117,6 @@ export const useUserStore = defineStore('user', () => {
     await updateUserProfile(currentUser.value.uid, updates)
     await refreshProfile(currentUser.value)
     await refreshUsers()
-    success.value = 'Profile saved successfully.'
   }
 
   async function setUserHasSecretSanta(userId: string, value = true) {

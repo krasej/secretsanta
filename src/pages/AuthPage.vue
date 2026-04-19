@@ -9,7 +9,8 @@ import MessageBlock from '@/components/MessageBlock.vue'
 
 const router = useRouter()
 const userStore = useUserStore()
-const { error, isLoggedIn } = storeToRefs(userStore)
+const error = ref('')
+const { isLoggedIn } = storeToRefs(userStore)
 
 const authMode = ref<'login' | 'register'>('login')
 const form = reactive({
@@ -63,7 +64,7 @@ async function submitForm() {
       resetForm()
     }
   } catch {
-    error.value = 'Unable to authenticate. Check your Firebase setup and credentials.'
+    error.value = 'Unable to authenticate. Check your credentials.'
   }
 }
 </script>
@@ -124,7 +125,6 @@ async function submitForm() {
 .auth-switch .primary:not(.active) {
   background-color: transparent;
 }
-
 
 .auth-switch .register.active {
   background-color: var(--color-secondary);

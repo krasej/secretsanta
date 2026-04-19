@@ -7,7 +7,11 @@ import MessageBlock from '../components/MessageBlock.vue'
 import { useUserStore } from '../stores/user'
 
 const userStore = useUserStore()
-const { profile, error, success } = storeToRefs(userStore)
+const profileError = reactive({ value: '' })
+const profileSuccess = reactive({ value: '' })
+const presentError = reactive({ value: '' })
+const presentSuccess = reactive({ value: '' })
+const { profile } = storeToRefs(userStore)
 const presentForm = reactive({
   headline: '',
   description: '',
@@ -38,12 +42,9 @@ watch(
 
 async function savePresent() {
   if (!presentForm.headline) {
-    error.value = 'Headline is required for a wish.'
+    presentError.value = 'Headline is required for a wish.'
     return
   }
-
-
-  userStore.resetMessages()
 
   await userStore.saveProfile({
     presents: [
@@ -55,6 +56,10 @@ async function savePresent() {
       },
 
     ],
+  }).then(() => {
+    presentSuccess.value = 'Wish saved successfully.'
+  }).catch(() => {
+    presentError.value = 'Unable to save your wish.'
   })
 
   presentForm.headline = ''
@@ -63,16 +68,17 @@ async function savePresent() {
 }
 
 async function saveChanges() {
-  userStore.resetMessages()
 
   try {
     await userStore.saveProfile({
       name: userForm.name,
       discordName: userForm.discordName,
       address: userForm.address
+    }).then(() => {
+      profileSuccess.value = 'Profile saved successfully.'
     })
   } catch {
-    error.value = 'Unable to save your profile.'
+    profileError.value = 'Unable to save your profile.'
   }
 }
 </script>
@@ -81,18 +87,27 @@ async function saveChanges() {
 
   <section>
     <h1>Your Profile</h1>
-    <p>This is where you can view and edit your profile and see your wishes</p>
+    <p>This is where you can view and edit your profile and see your wishes!</p>
 
     <div v-if="profile" class="profile-card current-profile">
       <h2>Your wishes!</h2>
 
-      <div class="present-cards">
-        <template v-for="(present, i) in profile.presents" :key="i">
+      <div v-if="profile.presents?.length === 0">You have not added any wishes yet. Add some so your Secret Santa knows
+        what to get you!
+      </div>
+
+      <div class="present-cards" v-else>
+        <template v-for="(present, i) in profile.presents"
+          :key="`${i}-${present.headline}-${present.url}-${present.image ?? ''}`">
           <PresentBlock :present="present" :index="i" :enable-editing="true" />
         </template>
       </div>
 
       <h3>Add a wish!</h3>
+
+      <MessageBlock v-if="presentError.value" :message="presentError.value" type="error" />
+      <MessageBlock v-if="presentSuccess.value" :message="presentSuccess.value" type="success" />
+
 
       <form class="present-form" @submit.prevent="savePresent">
         <label>
@@ -119,8 +134,8 @@ async function saveChanges() {
 
       <h3>Update your profile</h3>
 
-      <MessageBlock v-if="error" :message="error" type="error" />
-      <MessageBlock v-if="success" :message="success" type="success" />
+      <MessageBlock v-if="profileError.value" :message="profileError.value" type="error" />
+      <MessageBlock v-if="profileSuccess.value" :message="profileSuccess.value" type="success" />
 
       <form class="edit-form" @submit.prevent="saveChanges">
         <label>
@@ -140,7 +155,6 @@ async function saveChanges() {
 
         <button type="submit" class="secondarycolor">Save profile</button>
       </form>
-
     </div>
   </section>
 </template>

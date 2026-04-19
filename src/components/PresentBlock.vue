@@ -1,7 +1,7 @@
 <script setup lang="ts">
 defineOptions({ name: 'PresentCard' })
 
-import { computed, onMounted, reactive, ref } from 'vue'
+import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { storeToRefs } from 'pinia'
 
 import type { PresentItem } from '../firebase'
@@ -24,6 +24,25 @@ const editablePresent = reactive<PresentItem>({
   url: props.present.url,
   image: props.present.image ?? null,
 })
+
+function syncPresentState(present: PresentItem) {
+  previewImage.value = present.image ?? ''
+
+  if (!isEditing.value) {
+    editablePresent.headline = present.headline
+    editablePresent.description = present.description
+    editablePresent.url = present.url
+    editablePresent.image = present.image ?? null
+  }
+}
+
+watch(
+  () => props.present,
+  (present) => {
+    syncPresentState(present)
+  },
+  { immediate: true, deep: true },
+)
 
 const shortenedUrl = computed(() => {
   if (!props.present.url) {
@@ -125,6 +144,16 @@ async function saveEdits() {
   isEditing.value = false
 }
 
+async function deletePresent() {
+  if (props.index === undefined || !profile.value?.presents) {
+    return
+  }
+
+  const presents = Array.isArray(profile.value.presents) ? [...profile.value.presents] : []
+  presents.splice(props.index, 1)
+  await userStore.saveProfile({ presents })
+}
+
 function cancelEdits() {
   editablePresent.headline = props.present.headline
   editablePresent.description = props.present.description
@@ -174,11 +203,6 @@ onMounted(async () => {
           <input type="url" v-model="editablePresent.url" />
         </label>
 
-        <div>
-          <button class="cancel-button" @click="cancelEdits">Cancel</button>
-          <button class="save-button" @click="saveEdits">Save</button>
-        </div>
-
       </div>
 
       <div v-else>
@@ -190,7 +214,11 @@ onMounted(async () => {
         <p v-if="present.description" class="present-description">{{ present.description }}</p>
         <a :href="present.url" target="_blank" rel="noopener noreferrer">{{ shortenedUrl }}</a>
       </div>
-
+    </div>
+    <div class="edit-actions" v-if="isEditing">
+      <button class="delete-button" @click="deletePresent">Delete</button>
+      <button class="cancel-button" @click="cancelEdits">Cancel</button>
+      <button class="save-button primary" @click="saveEdits">Save</button>
     </div>
   </div>
 </template>
@@ -199,6 +227,18 @@ onMounted(async () => {
 .present-description {
   margin: 1rem 0;
   font-size: 0.95rem;
+}
+
+.edit-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+  flex: 1
+}
+
+.delete-button {
+  margin-right: auto;
 }
 
 .placeholder {
