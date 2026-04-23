@@ -2,6 +2,7 @@ import { computed, ref } from 'vue'
 import { defineStore } from 'pinia'
 
 import {
+  deleteUser as deleteFirebaseUser,
   getAllUsers,
   getCurrentUser,
   getUserProfile,
@@ -129,6 +130,24 @@ export const useUserStore = defineStore('user', () => {
     await refreshUsers()
   }
 
+  async function deleteUser(userId: string) {
+    resetMessages()
+    await deleteFirebaseUser(userId)
+
+    if (currentUser.value?.uid === userId) {
+      clearUserState()
+      success.value = 'Account deleted successfully.'
+      return
+    }
+
+    if (currentUser.value) {
+      await refreshProfile(currentUser.value)
+    }
+
+    await refreshUsers()
+    success.value = 'User deleted successfully.'
+  }
+
   async function logout() {
     resetMessages()
     await signOutUser()
@@ -180,6 +199,7 @@ export const useUserStore = defineStore('user', () => {
     register,
     saveProfile,
     setUserHasSecretSanta,
+    deleteUser,
     logout,
     refreshProfile,
     refreshUsers,

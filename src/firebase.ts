@@ -1,6 +1,7 @@
 import { initializeApp } from 'firebase/app'
 import {
   createUserWithEmailAndPassword,
+  deleteUser as deleteAuthUser,
   getAuth,
   onAuthStateChanged,
   signInWithEmailAndPassword,
@@ -9,6 +10,7 @@ import {
 } from 'firebase/auth'
 import {
   collection,
+  deleteDoc,
   doc,
   getDoc,
   getDocs,
@@ -76,14 +78,23 @@ export async function registerUser(
       presents: profile.presents ?? [],
       role: 'user',
       hasSecretSanta: profile.hasSecretSanta ?? false,
+      excludedReceiverIds: profile.excludedReceiverIds ?? [],
     }),
     setDoc(doc(db, 'userPrivate', uid), {
       email,
-      excludedReceiverIds: profile.excludedReceiverIds ?? [],
     }),
   ])
 
   return credential.user
+}
+
+export async function deleteUser(uid: string) {
+  if (auth.currentUser?.uid === uid) {
+    await Promise.all([deleteDoc(doc(db, 'users', uid)), deleteDoc(doc(db, 'userPrivate', uid))])
+
+    // Firebase Auth allows client-side deletion only for the current signed-in user.
+    await deleteAuthUser(auth.currentUser)
+  }
 }
 
 export async function loginUser(email: string, password: string) {
@@ -178,12 +189,12 @@ export async function updateUserProfile(uid: string, updates: Partial<UserProfil
     publicUpdates.receiverAddress = updates.receiverAddress
   }
 
-  if (updates.email !== undefined) {
-    privateUpdates.email = updates.email
+  if (updates.excludedReceiverIds !== undefined) {
+    publicUpdates.excludedReceiverIds = updates.excludedReceiverIds
   }
 
-  if (updates.excludedReceiverIds !== undefined) {
-    privateUpdates.excludedReceiverIds = updates.excludedReceiverIds
+  if (updates.email !== undefined) {
+    privateUpdates.email = updates.email
   }
 
   const writes: Promise<unknown>[] = []

@@ -4,6 +4,7 @@ import { reactive, watch } from 'vue'
 
 import PresentBlock from '../components/PresentBlock.vue'
 import MessageBlock from '../components/MessageBlock.vue'
+import ModalComponent from '@/components/ModalComponent.vue'
 import { useUserStore } from '../stores/user'
 
 const userStore = useUserStore()
@@ -85,6 +86,8 @@ async function saveChanges() {
 
 <template>
 
+  <ModalComponent message="Hallo" :isOpen="false" />
+
   <section>
     <h1>Your Profile</h1>
     <p>This is where you can view and edit your profile and see your wishes!</p>
@@ -155,6 +158,9 @@ async function saveChanges() {
 
         <button type="submit" class="secondarycolor">Save profile</button>
       </form>
+      <div>
+        <button class="secondarycolor" @click="userStore.deleteUser(profile.id)">Delete User</button>
+      </div>
     </div>
   </section>
 </template>
