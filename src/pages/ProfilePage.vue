@@ -4,7 +4,6 @@ import { reactive, watch } from 'vue'
 
 import PresentBlock from '../components/PresentBlock.vue'
 import MessageBlock from '../components/MessageBlock.vue'
-import ModalComponent from '@/components/ModalComponent.vue'
 import { useUserStore } from '../stores/user'
 
 const userStore = useUserStore()
@@ -82,11 +81,18 @@ async function saveChanges() {
     profileError.value = 'Unable to save your profile.'
   }
 }
+
+import { useModalStore } from '../stores/modal'
+
+function deleteUser() {
+  useModalStore().openModal('Hallo, thanks for clicking', 'Delete User', 'Confirm really hard', 'Cancel', () => {
+    alert('User deleted! (not really, this is just a demo)')
+  })
+
+}
+
 </script>
-
 <template>
-
-  <ModalComponent message="Hallo" :isOpen="false" />
 
   <section>
     <h1>Your Profile</h1>
@@ -159,7 +165,7 @@ async function saveChanges() {
         <button type="submit" class="secondarycolor">Save profile</button>
       </form>
       <div>
-        <button class="secondarycolor" @click="userStore.deleteUser(profile.id)">Delete User</button>
+        <button class="secondarycolor" @click="deleteUser">Delete User</button>
       </div>
     </div>
   </section>

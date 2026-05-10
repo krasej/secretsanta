@@ -15,12 +15,16 @@
 }
 
 :root {
+  --color-background: #333;
+
   --font-headline: 'Delius', cursive;
   --font-text: 'Delius', Arial, Helvetica, sans-serif;
   --color-secondary: #e4bd0f;
   --color-secondary-bright: #ebd266;
   --color-primary: #b30422;
   --color-primary-bright: #fa4664;
+  --color-border: #666;
+
   --border-radius: 5px;
   --border-radius-lg: 15px;
 
@@ -36,7 +40,7 @@
 }
 
 html {
-  background-color: #333;
+  background-color: var(--color-background);
   color: #fff;
   font-family: var(--font-text);
 }

@@ -3,6 +3,7 @@ import { storeToRefs } from 'pinia'
 import { useRouter } from 'vue-router'
 
 import { useUserStore } from './stores/user'
+import ModalComponent from './components/ModalComponent.vue'
 
 const router = useRouter()
 const userStore = useUserStore()
@@ -18,6 +19,7 @@ async function handleSignOut() {
 </script>
 
 <template>
+  <ModalComponent />
   <main class="app-shell">
     <nav v-if="isLoggedIn" class="top-nav">
       <div class="nav-links">
