@@ -94,6 +94,8 @@ export async function deleteUser(uid: string) {
 
     // Firebase Auth allows client-side deletion only for the current signed-in user.
     await deleteAuthUser(auth.currentUser)
+
+    signOutUser()
   }
 }
 

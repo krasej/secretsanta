@@ -85,10 +85,19 @@ async function saveChanges() {
 import { useModalStore } from '../stores/modal'
 
 function deleteUser() {
-  useModalStore().openModal('Hallo, thanks for clicking', 'Delete User', 'Confirm really hard', 'Cancel', () => {
-    alert('User deleted! (not really, this is just a demo)')
-  })
+  if (!profile.value) {
+    return
+  }
 
+  userStore.deleteUser(profile.value.id).then(() => {
+    useModalStore().closeModal()
+  }).catch(() => {
+    profileError.value = 'Unable to delete your account.'
+  })
+}
+
+function openDeleteModal() {
+  useModalStore().openModal('This will delete your account and all associated data permanently. Are you sure that you want to continue?', 'Delete your account', 'Confirm', 'Cancel', () => { deleteUser() })
 }
 
 </script>
@@ -162,11 +171,12 @@ function deleteUser() {
           <textarea v-model="userForm.address" rows="2"></textarea>
         </label>
 
-        <button type="submit" class="secondarycolor">Save profile</button>
+        <div class="form-buttons">
+
+          <button type="submit" class="primary">Save profile</button>
+          <button class="secondarycolor" @click.prevent="openDeleteModal">Delete User</button>
+        </div>
       </form>
-      <div>
-        <button class="secondarycolor" @click="deleteUser">Delete User</button>
-      </div>
     </div>
   </section>
 </template>
