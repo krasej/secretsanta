@@ -123,6 +123,23 @@ a:hover {
   gap: 1rem;
   margin-top: 1rem;
 }
+.exclude-user-card {
+  gap: 0.5rem;
+  padding: 1rem;
+  border: 1px solid #e5e7eb;
+  border-radius: var(--border-radius-lg);
+}
+
+.exclude-user-card-form {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: nowrap;
+  margin-top: 1rem;
+}
+
+.exclude-user-card-form--select {
+  flex: 1;
+}
 
 .present-card {
   border: 1px solid #e5e7eb;

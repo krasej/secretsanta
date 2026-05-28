@@ -33,7 +33,16 @@ const app = initializeApp(firebaseConfig)
 const auth = getAuth(app)
 const db = getFirestore(app)
 const usersCollection = collection(db, 'users')
-const privateProfilesCollection = collection(db, 'userPrivate')
+
+function normalizeExcludedIds(value: unknown): string[] {
+  if (Array.isArray(value)) {
+    return value.filter((id): id is string => typeof id === 'string' && id.length > 0)
+  }
+  if (typeof value === 'string' && value.length > 0) {
+    return [value]
+  }
+  return []
+}
 
 export type PresentItem = {
   headline: string
@@ -68,29 +77,25 @@ export async function registerUser(
   const credential = await createUserWithEmailAndPassword(auth, email, password)
   const uid = credential.user.uid
 
-  await Promise.all([
-    setDoc(doc(db, 'users', uid), {
-      name: profile.name,
-      discordName: profile.discordName,
-      address: profile.address || null,
-      receiver: profile.receiver || null,
-      receiverAddress: profile.receiverAddress || null,
-      presents: profile.presents ?? [],
-      role: 'user',
-      hasSecretSanta: profile.hasSecretSanta ?? false,
-      excludedReceiverIds: profile.excludedReceiverIds ?? [],
-    }),
-    setDoc(doc(db, 'userPrivate', uid), {
-      email,
-    }),
-  ])
+  await setDoc(doc(db, 'users', uid), {
+    name: profile.name,
+    discordName: profile.discordName,
+    address: profile.address || null,
+    receiver: profile.receiver || null,
+    receiverAddress: profile.receiverAddress || null,
+    presents: profile.presents ?? [],
+    role: 'user',
+    hasSecretSanta: profile.hasSecretSanta ?? false,
+    excludedReceiverIds: profile.excludedReceiverIds ?? [],
+    email,
+  })
 
   return credential.user
 }
 
 export async function deleteUser(uid: string) {
   if (auth.currentUser?.uid === uid) {
-    await Promise.all([deleteDoc(doc(db, 'users', uid)), deleteDoc(doc(db, 'userPrivate', uid))])
+    await deleteDoc(doc(db, 'users', uid))
 
     // Firebase Auth allows client-side deletion only for the current signed-in user.
     await deleteAuthUser(auth.currentUser)
@@ -112,59 +117,36 @@ export function onAuthStateChange(callback: (user: FirebaseAuthUser | null) => v
   return onAuthStateChanged(auth, callback)
 }
 
-export async function getUserProfile(
-  uid: string,
-  includePrivate = true,
-): Promise<UserProfile | null> {
+export async function getUserProfile(uid: string): Promise<UserProfile | null> {
   const publicSnapshot = await getDoc(doc(db, 'users', uid))
   if (!publicSnapshot.exists()) {
     return null
   }
 
+  const rawData = publicSnapshot.data() as Omit<UserProfile, 'id'>
   const profile = {
     id: publicSnapshot.id,
-    ...(publicSnapshot.data() as Omit<UserProfile, 'id'>),
+    ...rawData,
+    excludedReceiverIds: normalizeExcludedIds(rawData.excludedReceiverIds),
   } as UserProfile
-
-  if (!includePrivate) {
-    return profile
-  }
-
-  const privateSnapshot = await getDoc(doc(db, 'userPrivate', uid))
-  if (privateSnapshot.exists()) {
-    Object.assign(profile, privateSnapshot.data())
-  }
 
   return profile
 }
 
-export async function getAllUsers(
-  options: { includePrivate?: boolean } = {},
-): Promise<UserProfile[]> {
+export async function getAllUsers(): Promise<UserProfile[]> {
   const snapshot = await getDocs(query(usersCollection, orderBy('name')))
-  const profiles = snapshot.docs.map((item) => ({
-    id: item.id,
-    ...(item.data() as Omit<UserProfile, 'id'>),
-  }))
-
-  if (!options.includePrivate) {
-    return profiles
-  }
-
-  return Promise.all(
-    profiles.map(async (profile) => {
-      const privateSnapshot = await getDoc(doc(privateProfilesCollection, profile.id))
-      if (privateSnapshot.exists()) {
-        return { ...profile, ...(privateSnapshot.data() as Partial<UserProfile>) }
-      }
-      return profile
-    }),
-  )
+  return snapshot.docs.map((item) => {
+    const rawData = item.data() as Omit<UserProfile, 'id'>
+    return {
+      id: item.id,
+      ...rawData,
+      excludedReceiverIds: normalizeExcludedIds(rawData.excludedReceiverIds),
+    }
+  })
 }
 
 export async function updateUserProfile(uid: string, updates: Partial<UserProfile>) {
   const publicUpdates: Partial<UserProfile> = {}
-  const privateUpdates: Partial<UserProfile> = {}
 
   if (updates.name !== undefined) {
     publicUpdates.name = updates.name
@@ -196,17 +178,13 @@ export async function updateUserProfile(uid: string, updates: Partial<UserProfil
   }
 
   if (updates.email !== undefined) {
-    privateUpdates.email = updates.email
+    publicUpdates.email = updates.email
   }
 
   const writes: Promise<unknown>[] = []
 
   if (Object.keys(publicUpdates).length > 0) {
     writes.push(setDoc(doc(db, 'users', uid), publicUpdates, { merge: true }))
-  }
-
-  if (Object.keys(privateUpdates).length > 0) {
-    writes.push(setDoc(doc(db, 'userPrivate', uid), privateUpdates, { merge: true }))
   }
 
   await Promise.all(writes)

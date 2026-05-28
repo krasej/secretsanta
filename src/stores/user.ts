@@ -50,6 +50,10 @@ export const useUserStore = defineStore('user', () => {
     users.value = []
   }
 
+  function getUserById(userId: string) {
+    return users.value.find((user) => user.id === userId) || null
+  }
+
   function formatPresents(value: unknown) {
     if (value == null || value === '') {
       return 'None'
@@ -71,11 +75,11 @@ export const useUserStore = defineStore('user', () => {
   }
 
   async function refreshProfile(user: FirebaseUser) {
-    profile.value = await getUserProfile(user.uid, true)
+    profile.value = await getUserProfile(user.uid)
   }
 
   async function refreshUsers() {
-    users.value = await getAllUsers({ includePrivate: isAdmin.value })
+    users.value = await getAllUsers()
   }
 
   async function login(email: string, password: string) {
@@ -193,6 +197,7 @@ export const useUserStore = defineStore('user', () => {
     success,
     isAdmin,
     isLoggedIn,
+    getUserById,
     formatPresents,
     initializeAuth,
     login,

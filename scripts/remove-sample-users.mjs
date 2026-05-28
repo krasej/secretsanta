@@ -48,7 +48,6 @@ async function removeUser(user) {
     await currentUser.getIdToken(true)
 
     await deleteDoc(doc(db, 'users', uid))
-    await deleteDoc(doc(db, 'userPrivate', uid))
     await deleteUser(currentUser)
 
     console.log(`Removed sample user: ${user.email}`)

@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 
 import { getCurrentUser } from '../firebase'
 import { useUserStore } from '../stores/user'
+import { getActivePinia } from 'pinia'
 import AuthPage from '../pages/AuthPage.vue'
 import Home from '../pages/HomePage.vue'
 import MyProfile from '../pages/ProfilePage.vue'
@@ -24,7 +25,7 @@ const router = createRouter({
 
 router.beforeEach((to) => {
   const user = getCurrentUser()
-  const isAdmin = useUserStore().isAdmin
+  const isAdmin = getActivePinia() ? useUserStore().isAdmin : false
 
   if (to.meta.requiresAdmin && !isAdmin) {
     return '/'

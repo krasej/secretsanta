@@ -66,8 +66,6 @@ const sampleUsers = [
         },
       ],
       role: 'user',
-    },
-    privateProfile: {
       excludedReceiverIds: [],
     },
   },
@@ -91,8 +89,6 @@ const sampleUsers = [
         },
       ],
       role: 'user',
-    },
-    privateProfile: {
       excludedReceiverIds: [],
     },
   },
@@ -116,8 +112,6 @@ const sampleUsers = [
         },
       ],
       role: 'user',
-    },
-    privateProfile: {
       excludedReceiverIds: [],
     },
   },
@@ -145,17 +139,14 @@ async function ensureUser(user) {
 
   const uid = credential.user.uid
 
-  await Promise.all([
-    setDoc(doc(db, 'users', uid), user.publicProfile, { merge: true }),
-    setDoc(
-      doc(db, 'userPrivate', uid),
-      {
-        email: user.email,
-        ...user.privateProfile,
-      },
-      { merge: true },
-    ),
-  ])
+  await setDoc(
+    doc(db, 'users', uid),
+    {
+      ...user.publicProfile,
+      email: user.email,
+    },
+    { merge: true },
+  )
 
   console.log(`Upserted Firestore docs for ${user.email}`)
   await signOut(auth)
