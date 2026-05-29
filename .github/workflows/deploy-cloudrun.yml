@@ -1,0 +1,30 @@
+name: Deploy backend -> Cloud Run
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup gcloud
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          service_account_key: ${{ secrets.GCP_SA_KEY }}
+          project_id: ${{ secrets.GCP_PROJECT }}
+
+      - name: Build container and push
+        run: |
+          gcloud builds submit ./backend --tag gcr.io/${{ secrets.GCP_PROJECT }}/secret-santa-backend
+
+      - name: Deploy to Cloud Run
+        run: |
+          gcloud run deploy secret-santa-backend \
+            --image gcr.io/${{ secrets.GCP_PROJECT }}/secret-santa-backend \
+            --region us-central1 \
+            --platform managed \
+            --allow-unauthenticated \
+            --set-env-vars FIREBASE_SERVICE_ACCOUNT_JSON="${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON }}"

@@ -1,3 +1,4 @@
 # Don't commit Firebase service account credentials
 service-account.json
+cloudbuild-service-account.json
 .env
