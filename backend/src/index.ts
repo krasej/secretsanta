@@ -97,6 +97,63 @@ app.get('/api/me/private', verifyToken, async (req: AuthenticatedRequest, res) =
   res.json(privatePayload)
 })
 
+app.get('/api/preview', verifyToken, async (req: AuthenticatedRequest, res) => {
+  const requestedUrl = req.query.url
+  if (!requestedUrl || typeof requestedUrl !== 'string') {
+    return res.status(400).json({ error: 'Missing preview URL' })
+  }
+
+  let previewUrl: URL
+  try {
+    previewUrl = new URL(requestedUrl)
+  } catch {
+    return res.status(400).json({ error: 'Invalid URL' })
+  }
+
+  if (!/^https?:$/i.test(previewUrl.protocol)) {
+    return res.status(400).json({ error: 'Only HTTP/HTTPS URLs are supported' })
+  }
+
+  try {
+    const response = await fetch(previewUrl.toString(), {
+      redirect: 'follow',
+      headers: {
+        'User-Agent':
+          'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        Accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+      },
+    })
+
+    if (!response.ok) {
+      return res.status(502).json({ error: 'Unable to fetch preview URL' })
+    }
+
+    const contentType = response.headers.get('content-type') ?? ''
+    if (!contentType.includes('html')) {
+      return res.json({ imageUrl: null })
+    }
+
+    const html = await response.text()
+    const ogMatch = html.match(/<meta[^>]+property=["']og:image["'][^>]+content=["']([^"']+)["']/i)
+    if (ogMatch?.[1]) {
+      const imageUrl = new URL(ogMatch[1], previewUrl).toString()
+      return res.json({ imageUrl })
+    }
+
+    const iconMatch = html.match(
+      /<link[^>]+rel=["'](?:icon|shortcut icon)["'][^>]+href=["']([^"']+)["']/i,
+    )
+    if (iconMatch?.[1]) {
+      const imageUrl = new URL(iconMatch[1], previewUrl).toString()
+      return res.json({ imageUrl })
+    }
+
+    return res.json({ imageUrl: null })
+  } catch (error) {
+    return res.status(502).json({ error: 'Unable to fetch preview URL' })
+  }
+})
+
 app.get('/api/users/:userId/private', verifyToken, async (req: AuthenticatedRequest, res) => {
   const uid = req.user?.uid
   if (!uid) {

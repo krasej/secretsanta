@@ -33,6 +33,7 @@ npm run dev
 - `GET /api/me` — safe profile of the authenticated user
 - `GET /api/me/private` — private fields for the authenticated user
 - `GET /api/users/:userId/private` — private fields for another user if allowed
+- `GET /api/preview?url=<site_url>` — fetch the preview image URL for a remote link via the backend
 - `PATCH /api/me/private` — update the authenticated user's private address fields
 - `PATCH /api/users/:userId/private` — update another user's private fields if you are an admin
 

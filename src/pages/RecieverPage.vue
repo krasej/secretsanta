@@ -79,8 +79,11 @@ async function assignGiftee() {
 
   await userStore.saveProfile({
     receiver: selectedUser.name,
-    receiverAddress: privateData?.address ?? null,
   })
+
+  if (privateData?.address) {
+    receiverAddress.value = privateData.address
+  }
 
   await userStore.setUserHasSecretSanta(selectedUser.id, true)
   success.value = `${selectedUser.name} has been marked as assigned.`
@@ -95,13 +98,13 @@ async function assignGiftee() {
       <p>You are getting a great gift for <strong>{{ profile.receiver }}</strong>.</p>
       <p>
         Delivery address:
-        <strong v-if="profile.receiverAddress || receiverAddress">
-          {{ profile.receiverAddress || receiverAddress }}
+        <strong v-if="receiverAddress">
+          {{ receiverAddress }}
         </strong>
         <span v-else>Not loaded</span>
       </p>
-      <button v-if="!profile.receiverAddress && !receiverAddress" class="secondary" type="button"
-        @click="revealReceiverAddress" :disabled="addressLoading">
+      <button v-if="!receiverAddress" class="secondary" type="button" @click="revealReceiverAddress"
+        :disabled="addressLoading">
         {{ addressLoading ? 'Loading address...' : 'Reveal address' }}
       </button>
       <div v-if="addressError" class="message error">{{ addressError }}</div>

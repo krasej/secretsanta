@@ -102,7 +102,6 @@ export const useUserStore = defineStore('user', () => {
       receiver: payload.receiver ?? '',
       presents: payload.presents ?? [],
       address: payload.address ?? '',
-      receiverAddress: null,
       hasSecretSanta: payload.hasSecretSanta ?? false,
       excludedReceiverIds: payload.excludedReceiverIds ?? [],
     })

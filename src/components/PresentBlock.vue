@@ -5,6 +5,7 @@ import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { storeToRefs } from 'pinia'
 
 import type { PresentItem } from '../firebase'
+import { fetchPreviewImage } from '../firebase'
 import { useUserStore } from '../stores/user'
 
 const props = defineProps<{
@@ -65,24 +66,7 @@ const hasImage = computed(() => Boolean(previewImage.value))
 
 async function resolvePreviewImage(url: string): Promise<string | null> {
   try {
-    const response = await fetch(url)
-    if (response.ok) {
-      const html = await response.text()
-      const match = html.match(/<meta[^>]+property=["']og:image["'][^>]+content=["']([^"']+)["']/i)
-
-      console.log('Discovered preview image:', match?.[1])
-
-      if (match?.[1]) {
-        return new URL(match[1], url).href
-      }
-    }
-  } catch {
-    // Cross-origin sites often block page scraping in the browser :c.
-  }
-
-  try {
-    const domain = new URL(url).hostname
-    return `https://www.google.com/s2/favicons?domain=${domain}&sz=128`
+    return await fetchPreviewImage(url)
   } catch {
     return null
   }

@@ -16,7 +16,6 @@ export interface AuthenticatedRequest extends express.Request {
 
 export type PrivateUserData = {
   address?: string | null
-  receiverAddress?: string | null
 }
 
 export function safeProfile(userId: string, data: DocumentData | undefined) {
@@ -54,7 +53,6 @@ export async function getPrivatePayload(targetUid: string) {
     return {
       id: targetUid,
       address: privateData.address ?? null,
-      receiverAddress: privateData.receiverAddress ?? null,
     }
   }
 
@@ -63,7 +61,6 @@ export async function getPrivatePayload(targetUid: string) {
     ? {
         id: targetUid,
         address: fallback.address ?? null,
-        receiverAddress: fallback.receiverAddress ?? null,
       }
     : null
 }
@@ -128,9 +125,6 @@ export function parsePrivateUpdates(body: unknown): PrivateUserData {
     const data = body as Record<string, unknown>
     if (data.address === null || typeof data.address === 'string') {
       updates.address = data.address as string | null
-    }
-    if (data.receiverAddress === null || typeof data.receiverAddress === 'string') {
-      updates.receiverAddress = data.receiverAddress as string | null
     }
   }
   return updates

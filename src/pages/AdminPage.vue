@@ -7,7 +7,7 @@ import { fetchPrivateUserData } from '../firebase'
 import ExcludeUserBlock from '../components/ExludeUserBlock.vue'
 
 const userStore = useUserStore()
-const privateData = reactive<Record<string, { address: string | null; receiverAddress: string | null }>>({})
+const privateData = reactive<Record<string, { address: string | null }>>({})
 const loading = reactive<Record<string, boolean>>({})
 
 onMounted(async () => {
@@ -17,7 +17,7 @@ onMounted(async () => {
 async function revealPrivate(userId: string) {
   loading[userId] = true
   try {
-    privateData[userId] = (await fetchPrivateUserData(userId)) ?? { address: null, receiverAddress: null }
+    privateData[userId] = (await fetchPrivateUserData(userId)) ?? { address: null }
   } finally {
     loading[userId] = false
   }
@@ -43,7 +43,6 @@ async function revealPrivate(userId: string) {
             </button>
             <div v-if="privateData[user.id]">
               <p><strong>Private address:</strong> {{ privateData[user.id]?.address || 'None' }}</p>
-              <p><strong>Receiver address:</strong> {{ privateData[user.id]?.receiverAddress || 'None' }}</p>
             </div>
           </div>
         </div>

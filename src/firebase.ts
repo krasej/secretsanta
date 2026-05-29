@@ -62,7 +62,6 @@ export type UserProfile = {
   role?: 'admin' | 'user'
   email?: string
   address?: string | null
-  receiverAddress?: string | null
   hasSecretSanta?: boolean
   excludedReceiverIds?: string[]
 }
@@ -90,7 +89,6 @@ export async function registerUser(
 
   await setDoc(doc(db, 'userPrivate', uid), {
     address: profile.address || null,
-    receiverAddress: profile.receiverAddress || null,
   })
 
   return credential.user
@@ -140,7 +138,6 @@ export async function getUserProfile(uid: string): Promise<UserProfile | null> {
     if (privateSnapshot.exists()) {
       const privateData = privateSnapshot.data() as Partial<UserProfile>
       profile.address = privateData.address ?? null
-      profile.receiverAddress = privateData.receiverAddress ?? null
     }
   }
 
@@ -164,7 +161,28 @@ export async function fetchPrivateUserData(userId: string) {
     return null
   }
 
-  return (await response.json()) as { address: string | null; receiverAddress: string | null }
+  return (await response.json()) as { address: string | null }
+}
+
+export async function fetchPreviewImage(url: string): Promise<string | null> {
+  const current = auth.currentUser
+  if (!current) {
+    return null
+  }
+
+  const token = await current.getIdToken()
+  const response = await fetch(`${backendBaseUrl}/api/preview?url=${encodeURIComponent(url)}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  })
+
+  if (!response.ok) {
+    return null
+  }
+
+  const data = await response.json()
+  return (data as { imageUrl: string | null }).imageUrl ?? null
 }
 
 export async function getAllUsers(): Promise<UserProfile[]> {
@@ -214,9 +232,6 @@ export async function updateUserProfile(uid: string, updates: Partial<UserProfil
 
   if (updates.address !== undefined) {
     privateUpdates.address = updates.address
-  }
-  if (updates.receiverAddress !== undefined) {
-    privateUpdates.receiverAddress = updates.receiverAddress
   }
 
   const writes: Promise<unknown>[] = []

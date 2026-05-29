@@ -79,21 +79,18 @@ Create one document in the **users** collection and one document in the **userPr
 - Document ID: Emma's Auth UID
 - email: emma.frosting@example.com
 - address: 12 Candy Cane Lane
-- receiverAddress: null
 
 #### Leo document
 
 - Document ID: Leo's Auth UID
 - email: leo.lantern@example.com
 - address: 88 Winter Oak Road
-- receiverAddress: null
 
 #### Nina document
 
 - Document ID: Nina's Auth UID
 - email: nina.snow@example.com
 - address: 5 Snowdrop Court
-- receiverAddress: null
 
 ## Quickest way to add them
 

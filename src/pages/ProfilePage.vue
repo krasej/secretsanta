@@ -148,7 +148,6 @@ function openDeleteModal() {
       <div>Email: {{ profile.email || 'None' }}</div>
       <div>Your address: {{ profile.address || 'None' }}</div>
       <div>Receiver: {{ profile.receiver || 'Not assigned' }}</div>
-      <div>Receiver address: {{ profile.receiverAddress || 'Not assigned yet' }}</div>
 
       <h3>Update your profile</h3>
 
