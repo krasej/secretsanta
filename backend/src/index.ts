@@ -34,9 +34,17 @@ async function createFirebaseApp() {
     )
   }
 
-  const serviceAccount = serviceAccountJson
-    ? JSON.parse(serviceAccountJson)
-    : JSON.parse(await readFile(serviceAccountPath!, 'utf8'))
+  let serviceAccount: any
+  if (serviceAccountJson) {
+    try {
+      serviceAccount = JSON.parse(serviceAccountJson)
+    } catch {
+      // If the secret was mounted as a file path (Cloud Run secrets), read the file
+      serviceAccount = JSON.parse(await readFile(serviceAccountJson, 'utf8'))
+    }
+  } else {
+    serviceAccount = JSON.parse(await readFile(serviceAccountPath!, 'utf8'))
+  }
 
   initializeApp({ credential: cert(serviceAccount) })
 }
