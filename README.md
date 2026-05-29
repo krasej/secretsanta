@@ -35,6 +35,18 @@ yarn
 yarn dev
 ```
 
+### Backend Service
+
+A separate Node backend is available under `backend/` to serve private user data securely.
+
+```sh
+cd backend
+npm install
+npm run dev
+```
+
+The backend exposes authenticated endpoints under `/api` and is configured to proxy from Vite during local development.
+
 ### Type-Check, Compile and Minify for Production
 
 ```sh

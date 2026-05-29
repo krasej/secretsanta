@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { storeToRefs } from 'pinia'
 
 import Present from '../components/PresentBlock.vue'
 import { useUserStore } from '../stores/user'
+import { fetchPrivateUserData } from '../firebase'
 
 const userStore = useUserStore()
 const { profile, error, success } = storeToRefs(userStore)
@@ -24,6 +25,10 @@ const eligibleUsers = computed(() => {
   })
 })
 
+const receiverAddress = ref<string | null>(null)
+const addressLoading = ref(false)
+const addressError = ref('')
+
 const receiverProfile = computed(() => {
   if (!profile.value?.receiver) {
     return null
@@ -31,6 +36,25 @@ const receiverProfile = computed(() => {
 
   return userStore.users.find((user) => user.name === profile.value?.receiver) ?? null
 })
+
+async function revealReceiverAddress() {
+  if (!receiverProfile.value?.id) {
+    addressError.value = 'Unable to load receiver address.'
+    return
+  }
+
+  addressLoading.value = true
+  addressError.value = ''
+
+  try {
+    const privateData = await fetchPrivateUserData(receiverProfile.value.id)
+    receiverAddress.value = privateData?.address ?? null
+  } catch {
+    addressError.value = 'Unable to fetch receiver address.'
+  } finally {
+    addressLoading.value = false
+  }
+}
 
 async function assignGiftee() {
   if (!profile.value) {
@@ -51,9 +75,11 @@ async function assignGiftee() {
     return
   }
 
+  const privateData = await fetchPrivateUserData(selectedUser.id)
+
   await userStore.saveProfile({
     receiver: selectedUser.name,
-    receiverAddress: selectedUser.address ?? null,
+    receiverAddress: privateData?.address ?? null,
   })
 
   await userStore.setUserHasSecretSanta(selectedUser.id, true)
@@ -67,7 +93,18 @@ async function assignGiftee() {
 
     <div v-if="profile?.receiver">
       <p>You are getting a great gift for <strong>{{ profile.receiver }}</strong>.</p>
-      <p>Delivery address: {{ profile.receiverAddress || receiverProfile?.address || 'Not assigned yet' }}</p>
+      <p>
+        Delivery address:
+        <strong v-if="profile.receiverAddress || receiverAddress">
+          {{ profile.receiverAddress || receiverAddress }}
+        </strong>
+        <span v-else>Not loaded</span>
+      </p>
+      <button v-if="!profile.receiverAddress && !receiverAddress" class="secondary" type="button"
+        @click="revealReceiverAddress" :disabled="addressLoading">
+        {{ addressLoading ? 'Loading address...' : 'Reveal address' }}
+      </button>
+      <div v-if="addressError" class="message error">{{ addressError }}</div>
 
       <div v-if="receiverProfile?.presents?.length" class="present-cards">
         <Present v-for="(present, index) in receiverProfile.presents" :key="index" :present="present" />

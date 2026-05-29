@@ -80,14 +80,17 @@ export async function registerUser(
   await setDoc(doc(db, 'users', uid), {
     name: profile.name,
     discordName: profile.discordName,
-    address: profile.address || null,
     receiver: profile.receiver || null,
-    receiverAddress: profile.receiverAddress || null,
     presents: profile.presents ?? [],
     role: 'user',
     hasSecretSanta: profile.hasSecretSanta ?? false,
     excludedReceiverIds: profile.excludedReceiverIds ?? [],
     email,
+  })
+
+  await setDoc(doc(db, 'userPrivate', uid), {
+    address: profile.address || null,
+    receiverAddress: profile.receiverAddress || null,
   })
 
   return credential.user
@@ -117,6 +120,8 @@ export function onAuthStateChange(callback: (user: FirebaseAuthUser | null) => v
   return onAuthStateChanged(auth, callback)
 }
 
+const backendBaseUrl = import.meta.env.VITE_BACKEND_URL ?? ''
+
 export async function getUserProfile(uid: string): Promise<UserProfile | null> {
   const publicSnapshot = await getDoc(doc(db, 'users', uid))
   if (!publicSnapshot.exists()) {
@@ -124,13 +129,42 @@ export async function getUserProfile(uid: string): Promise<UserProfile | null> {
   }
 
   const rawData = publicSnapshot.data() as Omit<UserProfile, 'id'>
-  const profile = {
+  const profile: UserProfile = {
     id: publicSnapshot.id,
     ...rawData,
     excludedReceiverIds: normalizeExcludedIds(rawData.excludedReceiverIds),
   } as UserProfile
 
+  if (auth.currentUser?.uid === uid) {
+    const privateSnapshot = await getDoc(doc(db, 'userPrivate', uid))
+    if (privateSnapshot.exists()) {
+      const privateData = privateSnapshot.data() as Partial<UserProfile>
+      profile.address = privateData.address ?? null
+      profile.receiverAddress = privateData.receiverAddress ?? null
+    }
+  }
+
   return profile
+}
+
+export async function fetchPrivateUserData(userId: string) {
+  const current = auth.currentUser
+  if (!current) {
+    return null
+  }
+
+  const token = await current.getIdToken()
+  const response = await fetch(`${backendBaseUrl}/api/users/${userId}/private`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  })
+
+  if (!response.ok) {
+    return null
+  }
+
+  return (await response.json()) as { address: string | null; receiverAddress: string | null }
 }
 
 export async function getAllUsers(): Promise<UserProfile[]> {
@@ -139,7 +173,11 @@ export async function getAllUsers(): Promise<UserProfile[]> {
     const rawData = item.data() as Omit<UserProfile, 'id'>
     return {
       id: item.id,
-      ...rawData,
+      name: rawData.name,
+      discordName: rawData.discordName,
+      presents: rawData.presents ?? [],
+      role: rawData.role,
+      hasSecretSanta: rawData.hasSecretSanta ?? false,
       excludedReceiverIds: normalizeExcludedIds(rawData.excludedReceiverIds),
     }
   })
@@ -147,15 +185,13 @@ export async function getAllUsers(): Promise<UserProfile[]> {
 
 export async function updateUserProfile(uid: string, updates: Partial<UserProfile>) {
   const publicUpdates: Partial<UserProfile> = {}
+  const privateUpdates: Partial<UserProfile> = {}
 
   if (updates.name !== undefined) {
     publicUpdates.name = updates.name
   }
   if (updates.discordName !== undefined) {
     publicUpdates.discordName = updates.discordName
-  }
-  if (updates.address !== undefined) {
-    publicUpdates.address = updates.address
   }
   if (updates.receiver !== undefined) {
     publicUpdates.receiver = updates.receiver
@@ -169,22 +205,28 @@ export async function updateUserProfile(uid: string, updates: Partial<UserProfil
   if (updates.hasSecretSanta !== undefined) {
     publicUpdates.hasSecretSanta = updates.hasSecretSanta
   }
-  if (updates.receiverAddress !== undefined) {
-    publicUpdates.receiverAddress = updates.receiverAddress
-  }
-
   if (updates.excludedReceiverIds !== undefined) {
     publicUpdates.excludedReceiverIds = updates.excludedReceiverIds
   }
-
   if (updates.email !== undefined) {
     publicUpdates.email = updates.email
+  }
+
+  if (updates.address !== undefined) {
+    privateUpdates.address = updates.address
+  }
+  if (updates.receiverAddress !== undefined) {
+    privateUpdates.receiverAddress = updates.receiverAddress
   }
 
   const writes: Promise<unknown>[] = []
 
   if (Object.keys(publicUpdates).length > 0) {
     writes.push(setDoc(doc(db, 'users', uid), publicUpdates, { merge: true }))
+  }
+
+  if (Object.keys(privateUpdates).length > 0) {
+    writes.push(setDoc(doc(db, 'userPrivate', uid), privateUpdates, { merge: true }))
   }
 
   await Promise.all(writes)

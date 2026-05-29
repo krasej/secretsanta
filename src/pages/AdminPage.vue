@@ -1,15 +1,27 @@
 <script setup lang="ts">
 
-import { onMounted } from 'vue'
+import { onMounted, reactive } from 'vue'
 
 import { useUserStore } from '../stores/user'
+import { fetchPrivateUserData } from '../firebase'
 import ExcludeUserBlock from '../components/ExludeUserBlock.vue'
 
 const userStore = useUserStore()
+const privateData = reactive<Record<string, { address: string | null; receiverAddress: string | null }>>({})
+const loading = reactive<Record<string, boolean>>({})
 
 onMounted(async () => {
   await userStore.refreshUsers()
 })
+
+async function revealPrivate(userId: string) {
+  loading[userId] = true
+  try {
+    privateData[userId] = (await fetchPrivateUserData(userId)) ?? { address: null, receiverAddress: null }
+  } finally {
+    loading[userId] = false
+  }
+}
 
 </script>
 
@@ -25,6 +37,15 @@ onMounted(async () => {
       <div class="user-management">
         <div v-for="(user, i) in userStore.users" class="user-card" :key="i">
           <ExcludeUserBlock :user="user" />
+          <div class="private-address">
+            <button type="button" class="secondary" @click="revealPrivate(user.id)" :disabled="loading[user.id]">
+              {{ loading[user.id] ? 'Loading private info...' : 'Reveal private address' }}
+            </button>
+            <div v-if="privateData[user.id]">
+              <p><strong>Private address:</strong> {{ privateData[user.id]?.address || 'None' }}</p>
+              <p><strong>Receiver address:</strong> {{ privateData[user.id]?.receiverAddress || 'None' }}</p>
+            </div>
+          </div>
         </div>
       </div>
     </div>
