@@ -18,7 +18,7 @@ import {
 
 dotenv.config()
 
-const port = Number(process.env.PORT ?? 4000)
+const port = Number(process.env.PORT ?? 8080)
 
 async function createFirebaseApp() {
   if (getApps().length > 0) {
