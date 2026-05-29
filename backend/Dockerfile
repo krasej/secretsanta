@@ -20,5 +20,5 @@ RUN npm ci --production
 # Copy built artifacts
 COPY --from=build /app/dist ./dist
 
-EXPOSE 4000
+EXPOSE 8080
 CMD ["node", "dist/index.js"]
